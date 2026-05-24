@@ -166,32 +166,48 @@ export class PreloadScene extends Phaser.Scene {
    * Se generan 4 frames (uno por dirección) en una misma textura.
    */
   _createPlaceholderPlayer() {
-    const g = this.make.graphics({ x: 0, y: 0, add: false });
+    // Frame abajo (sur)
+    const down = this.make.graphics({ add: false });
+    down.fillStyle(0x4488FF); down.fillRect(0, 0, 32, 32);
+    down.fillStyle(0xFFDD44); down.fillCircle(16, 10, 8);
+    down.fillStyle(0xFFFFFF); down.fillRect(8, 20, 6, 10);
+    down.fillStyle(0xFFFFFF); down.fillRect(18, 20, 6, 10);
+    down.generateTexture('player_down', 32, 32);
+    down.destroy();
 
-    // Frame 0 — mirando abajo (sur)
-    g.fillStyle(0x4488FF); g.fillRect(0, 0, 32, 32);      // cuerpo azul
-    g.fillStyle(0xFFDD44); g.fillCircle(16, 10, 8);        // cabeza amarilla
-    g.fillStyle(0xFFFFFF); g.fillRect(8, 20, 6, 10);       // pierna izq
-    g.fillStyle(0xFFFFFF); g.fillRect(18, 20, 6, 10);      // pierna der
+    // Frame arriba (norte)
+    const up = this.make.graphics({ add: false });
+    up.fillStyle(0x4488FF); up.fillRect(0, 0, 32, 32);
+    up.fillStyle(0xFFDD44); up.fillCircle(16, 10, 8);
+    up.fillStyle(0x333333); up.fillRect(8, 20, 6, 10);
+    up.fillStyle(0x333333); up.fillRect(18, 20, 6, 10);
+    up.generateTexture('player_up', 32, 32);
+    up.destroy();
 
-    // Frame 1 — mirando arriba (norte)
-    g.fillStyle(0x4488FF); g.fillRect(32, 0, 32, 32);
-    g.fillStyle(0xFFDD44); g.fillCircle(48, 10, 8);
-    g.fillStyle(0x333333); g.fillRect(40, 20, 6, 10);
-    g.fillStyle(0x333333); g.fillRect(50, 20, 6, 10);
+    // Frame izquierda (oeste)
+    const left = this.make.graphics({ add: false });
+    left.fillStyle(0x4488FF); left.fillRect(0, 0, 32, 32);
+    left.fillStyle(0xFFDD44); left.fillCircle(16, 10, 8);
+    left.fillStyle(0xFFFFFF); left.fillRect(8, 20, 16, 10);
+    left.generateTexture('player_left', 32, 32);
+    left.destroy();
 
-    // Frame 2 — mirando izquierda (oeste)
-    g.fillStyle(0x4488FF); g.fillRect(64, 0, 32, 32);
-    g.fillStyle(0xFFDD44); g.fillCircle(80, 10, 8);
-    g.fillStyle(0xFFFFFF); g.fillRect(72, 20, 16, 10);
+    // Frame derecha (este)
+    const right = this.make.graphics({ add: false });
+    right.fillStyle(0x4488FF); right.fillRect(0, 0, 32, 32);
+    right.fillStyle(0xFFDD44); right.fillCircle(16, 10, 8);
+    right.fillStyle(0xFFFFFF); right.fillRect(8, 20, 16, 10);
+    right.generateTexture('player_right', 32, 32);
+    right.destroy();
 
-    // Frame 3 — mirando derecha (este)
-    g.fillStyle(0x4488FF); g.fillRect(96, 0, 32, 32);
-    g.fillStyle(0xFFDD44); g.fillCircle(112, 10, 8);
-    g.fillStyle(0xFFFFFF); g.fillRect(100, 20, 16, 10);
-
-    g.generateTexture('player', 128, 32);
-    g.destroy();
+    // Textura 'player' base (para el retrato del HUD y la batalla)
+    const base = this.make.graphics({ add: false });
+    base.fillStyle(0x4488FF); base.fillRect(0, 0, 32, 32);
+    base.fillStyle(0xFFDD44); base.fillCircle(16, 10, 8);
+    base.fillStyle(0xFFFFFF); base.fillRect(8, 20, 6, 10);
+    base.fillStyle(0xFFFFFF); base.fillRect(18, 20, 6, 10);
+    base.generateTexture('player', 32, 32);
+    base.destroy();
   }
 
   /**

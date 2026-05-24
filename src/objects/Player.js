@@ -24,16 +24,16 @@ import {
   MAX_LEVEL,
 } from '../utils/Constants.js';
 import { getLevelData, calcStatsForLevel } from '../data/levels.js';
-import { getSkillsForLevel }               from '../data/skills.js';
-import { STARTING_INVENTORY }              from '../data/items.js';
+import { getSkillsForLevel } from '../data/skills.js';
+import { STARTING_INVENTORY } from '../data/items.js';
 
 // Stats base del jugador en nivel 1
 const BASE_STATS = {
-  maxHp:   120,
-  maxMp:   60,
-  attack:  18,
+  maxHp: 120,
+  maxMp: 60,
+  attack: 18,
   defense: 10,
-  speed:   12,
+  speed: 12,
 };
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -59,7 +59,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.body.setOffset(6, 10);
 
     // ── Estado interno ──────────────────────────────────────────────────────
-    this._state     = PLAYER_STATES.IDLE;
+    this._state = PLAYER_STATES.IDLE;
     this._direction = DIRECTIONS.DOWN;
 
     // ── Inicializar stats según save o nueva partida ─────────────────────────
@@ -88,17 +88,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * Configura los stats para una nueva partida desde nivel 1.
    */
   _initNewGame() {
-    this.level   = 1;
-    this.exp     = 0;
-    this.score   = 0;
+    this.level = 1;
+    this.exp = 0;
+    this.score = 0;
 
     // Copiar stats base
-    const stats  = { ...BASE_STATS };
-    this.maxHp   = stats.maxHp;
-    this.maxMp   = stats.maxMp;
-    this.attack  = stats.attack;
+    const stats = { ...BASE_STATS };
+    this.maxHp = stats.maxHp;
+    this.maxMp = stats.maxMp;
+    this.attack = stats.attack;
     this.defense = stats.defense;
-    this.speed   = stats.speed;
+    this.speed = stats.speed;
 
     // HP y MP al máximo al comenzar
     this.hp = this.maxHp;
@@ -116,24 +116,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * @param {object} saveData
    */
   _loadFromSave(saveData) {
-    this.level   = saveData.level   ?? 1;
-    this.exp     = saveData.exp     ?? 0;
-    this.score   = saveData.score   ?? 0;
+    this.level = saveData.level ?? 1;
+    this.exp = saveData.exp ?? 0;
+    this.score = saveData.score ?? 0;
 
     // Recalcular stats acumulados hasta el nivel guardado
-    const stats  = calcStatsForLevel(this.level, { ...BASE_STATS });
-    this.maxHp   = stats.maxHp;
-    this.maxMp   = stats.maxMp;
-    this.attack  = stats.attack;
+    const stats = calcStatsForLevel(this.level, { ...BASE_STATS });
+    this.maxHp = stats.maxHp;
+    this.maxMp = stats.maxMp;
+    this.attack = stats.attack;
     this.defense = stats.defense;
-    this.speed   = stats.speed;
+    this.speed = stats.speed;
 
     // Restaurar HP/MP guardados (no necesariamente al máximo)
     this.hp = saveData.hp ?? this.maxHp;
     this.mp = saveData.mp ?? this.maxMp;
 
     this.inventory = saveData.inventory ?? { ...STARTING_INVENTORY };
-    this.skills    = getSkillsForLevel(this.level);
+    this.skills = getSkillsForLevel(this.level);
 
     console.log('[Player] Partida cargada — Nivel:', this.level);
   }
@@ -144,14 +144,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   _setupKeys(scene) {
     this._keys = scene.input.keyboard.addKeys({
-      up:        Phaser.Input.Keyboard.KeyCodes.W,
-      down:      Phaser.Input.Keyboard.KeyCodes.S,
-      left:      Phaser.Input.Keyboard.KeyCodes.A,
-      right:     Phaser.Input.Keyboard.KeyCodes.D,
-      arrowUp:   Phaser.Input.Keyboard.KeyCodes.UP,
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+      arrowUp: Phaser.Input.Keyboard.KeyCodes.UP,
       arrowDown: Phaser.Input.Keyboard.KeyCodes.DOWN,
       arrowLeft: Phaser.Input.Keyboard.KeyCodes.LEFT,
-      arrowRight:Phaser.Input.Keyboard.KeyCodes.RIGHT,
+      arrowRight: Phaser.Input.Keyboard.KeyCodes.RIGHT,
     });
   }
 
@@ -163,33 +163,31 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   _createAnimations(scene) {
     const anims = scene.anims;
-
-    // Evitar duplicados si la escena se reinicia
-    if (anims.exists('player_down'))  return;
+    if (anims.exists('player_down')) return;
 
     anims.create({
-      key:       'player_down',
-      frames:    [{ key: 'player', frame: 0 }],
+      key: 'player_down',
+      frames: [{ key: 'player_down' }],
       frameRate: 8,
-      repeat:    -1,
+      repeat: -1,
     });
     anims.create({
-      key:       'player_up',
-      frames:    [{ key: 'player', frame: 1 }],
+      key: 'player_up',
+      frames: [{ key: 'player_up' }],
       frameRate: 8,
-      repeat:    -1,
+      repeat: -1,
     });
     anims.create({
-      key:       'player_left',
-      frames:    [{ key: 'player', frame: 2 }],
+      key: 'player_left',
+      frames: [{ key: 'player_left' }],
       frameRate: 8,
-      repeat:    -1,
+      repeat: -1,
     });
     anims.create({
-      key:       'player_right',
-      frames:    [{ key: 'player', frame: 3 }],
+      key: 'player_right',
+      frames: [{ key: 'player_right' }],
       frameRate: 8,
-      repeat:    -1,
+      repeat: -1,
     });
   }
 
@@ -217,69 +215,39 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * La velocidad se escala con el stat speed del jugador.
    */
   _handleMovement() {
-    const keys    = this._keys;
-    const speed   = PLAYER_SPEED + (this.speed - BASE_STATS.speed) * 4;
-    let   vx      = 0;
-    let   vy      = 0;
-    let   moved   = false;
+    const keys = this._keys;
+    const speed = PLAYER_SPEED + (this.speed - BASE_STATS.speed) * 4;
+    let vx = 0, vy = 0, moved = false;
 
-    // ── Movimiento horizontal ──────────────────────────────────────────────
     if (keys.left.isDown || keys.arrowLeft.isDown) {
-      vx            = -speed;
-      this._direction = DIRECTIONS.LEFT;
-      moved         = true;
+      vx = -speed; this._direction = DIRECTIONS.LEFT; moved = true;
     } else if (keys.right.isDown || keys.arrowRight.isDown) {
-      vx            = speed;
-      this._direction = DIRECTIONS.RIGHT;
-      moved         = true;
+      vx = speed; this._direction = DIRECTIONS.RIGHT; moved = true;
     }
 
-    // ── Movimiento vertical ────────────────────────────────────────────────
     if (keys.up.isDown || keys.arrowUp.isDown) {
-      vy            = -speed;
-      this._direction = DIRECTIONS.UP;
-      moved         = true;
+      vy = -speed; this._direction = DIRECTIONS.UP; moved = true;
     } else if (keys.down.isDown || keys.arrowDown.isDown) {
-      vy            = speed;
-      this._direction = DIRECTIONS.DOWN;
-      moved         = true;
+      vy = speed; this._direction = DIRECTIONS.DOWN; moved = true;
     }
 
-    // ── Normalizar diagonal (evita que ir diagonal sea más rápido) ──────────
     if (vx !== 0 && vy !== 0) {
-      const norm = Math.SQRT2;
-      vx /= norm;
-      vy /= norm;
+      vx /= Math.SQRT2;
+      vy /= Math.SQRT2;
     }
 
     this.body.setVelocity(vx, vy);
 
-    // ── Animación ──────────────────────────────────────────────────────────
     if (moved) {
       this._state = PLAYER_STATES.MOVING;
       this.anims.play(`player_${this._direction}`, true);
     } else {
       this._state = PLAYER_STATES.IDLE;
       this.anims.stop();
-      // Mantener el frame de la última dirección cuando está quieto
-      this.setFrame(this._getIdleFrame());
+      // Usar setTexture en lugar de setFrame
+      this.setTexture(`player_${this._direction}`);
     }
   }
-
-  /**
-   * Retorna el frame correcto para el estado idle
-   * según la última dirección del jugador.
-   */
-  _getIdleFrame() {
-    const frameMap = {
-      [DIRECTIONS.DOWN]:  0,
-      [DIRECTIONS.UP]:    1,
-      [DIRECTIONS.LEFT]:  2,
-      [DIRECTIONS.RIGHT]: 3,
-    };
-    return frameMap[this._direction] ?? 0;
-  }
-
   // ─── Sistema de combate ───────────────────────────────────────────────────────
 
   /**
@@ -288,15 +256,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * @returns {number} daño real recibido
    */
   takeDamage(amount) {
-    const real  = Math.max(1, Math.floor(amount));
-    this.hp     = Math.max(0, this.hp - real);
+    const real = Math.max(1, Math.floor(amount));
+    this.hp = Math.max(0, this.hp - real);
 
     // Efecto visual: parpadeo rojo
     this.scene.tweens.add({
-      targets:  this,
-      tint:     { from: 0xFF4444, to: 0xFFFFFF },
+      targets: this,
+      tint: { from: 0xFF4444, to: 0xFFFFFF },
       duration: 300,
-      ease:     'Linear',
+      ease: 'Linear',
     });
 
     console.log(`[Player] Recibió ${real} de daño. HP: ${this.hp}/${this.maxHp}`);
@@ -310,15 +278,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   heal(amount) {
     const before = this.hp;
-    this.hp      = Math.min(this.maxHp, this.hp + Math.floor(amount));
+    this.hp = Math.min(this.maxHp, this.hp + Math.floor(amount));
     const healed = this.hp - before;
 
     // Efecto visual: destello verde
     this.scene.tweens.add({
-      targets:  this,
-      tint:     { from: 0x44FF44, to: 0xFFFFFF },
+      targets: this,
+      tint: { from: 0x44FF44, to: 0xFFFFFF },
       duration: 300,
-      ease:     'Linear',
+      ease: 'Linear',
     });
 
     console.log(`[Player] Curado ${healed} HP. HP: ${this.hp}/${this.maxHp}`);
@@ -381,8 +349,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    * @returns {number}
    */
   getEffectiveStat(statName) {
-    const base     = this[statName] ?? 0;
-    let   modifier = 1.0;
+    const base = this[statName] ?? 0;
+    let modifier = 1.0;
 
     this._activeEffects.forEach(effect => {
       if (effect.stat === statName) {
@@ -427,10 +395,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (newData) {
       // Aplicar crecimiento de stats del nuevo nivel
-      this.maxHp   += newData.statGrowth.maxHp;
-      this.attack  += newData.statGrowth.attack;
+      this.maxHp += newData.statGrowth.maxHp;
+      this.attack += newData.statGrowth.attack;
       this.defense += newData.statGrowth.defense;
-      this.speed   += newData.statGrowth.speed;
+      this.speed += newData.statGrowth.speed;
     }
 
     // Restaurar HP y MP al nuevo máximo
@@ -521,14 +489,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   serialize() {
     return {
-      level:     this.level,
-      exp:       this.exp,
-      score:     this.score,
-      hp:        this.hp,
-      mp:        this.mp,
+      level: this.level,
+      exp: this.exp,
+      score: this.score,
+      hp: this.hp,
+      mp: this.mp,
+      maxHp: this.maxHp,
+      maxMp: this.maxMp,
+      attack: this.attack,
+      defense: this.defense,
+      speed: this.speed,
       inventory: { ...this.inventory },
-      x:         Math.floor(this.x),
-      y:         Math.floor(this.y),
+      skills: this.skills,
+      x: Math.floor(this.x),
+      y: Math.floor(this.y),
     };
   }
 }

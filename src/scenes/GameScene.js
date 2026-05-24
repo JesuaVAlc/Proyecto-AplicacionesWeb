@@ -18,11 +18,11 @@
 
 import Phaser from 'phaser';
 import { SCENES, GAME_WIDTH, GAME_HEIGHT, STORAGE_KEYS } from '../utils/Constants.js';
-import { Player }    from '../objects/Player.js';
-import { ENEMIES }   from '../data/enemies.js';
+import { Player } from '../objects/Player.js';
+import { ENEMIES } from '../data/enemies.js';
 
 // Tamaño de cada tile en píxeles
-const TILE  = 32;
+const TILE = 32;
 
 // Dimensiones del mapa en tiles
 const MAP_COLS = 40;
@@ -79,8 +79,8 @@ export class GameScene extends Phaser.Scene {
   init(data) {
     // Recibir resultado de BattleScene cuando regresa
     // data.battleResult: 'win' | 'lose' | undefined
-    this._battleResult  = data?.battleResult  ?? null;
-    this._defeatedEnemy = data?.enemyId       ?? null;
+    this._battleResult = data?.battleResult ?? null;
+    this._defeatedEnemy = data?.enemyId ?? null;
   }
 
   // ─── create ──────────────────────────────────────────────────────────────────
@@ -135,10 +135,10 @@ export class GameScene extends Phaser.Scene {
    */
   _buildMap() {
     // Grupos de física para colisiones
-    this._wallGroup  = this.physics.add.staticGroup();
-    this._treeGroup  = this.physics.add.staticGroup();
-    this._saveZones  = this.physics.add.staticGroup();
-    this._voidZones  = this.physics.add.staticGroup(); // zonas de caída
+    this._wallGroup = this.physics.add.staticGroup();
+    this._treeGroup = this.physics.add.staticGroup();
+    this._saveZones = this.physics.add.staticGroup();
+    this._voidZones = this.physics.add.staticGroup(); // zonas de caída
 
     // Lista de spawns de enemigos: { x, y, type }
     this._enemySpawns = [];
@@ -146,8 +146,8 @@ export class GameScene extends Phaser.Scene {
     for (let row = 0; row < MAP_LAYOUT.length; row++) {
       for (let col = 0; col < MAP_LAYOUT[row].length; col++) {
         const char = MAP_LAYOUT[row][col];
-        const px   = col * TILE + TILE / 2;
-        const py   = row * TILE + TILE / 2;
+        const px = col * TILE + TILE / 2;
+        const py = row * TILE + TILE / 2;
 
         // Siempre colocar suelo debajo de todo
         if (char !== 'X') {
@@ -179,8 +179,8 @@ export class GameScene extends Phaser.Scene {
             // Texto flotante sobre la zona
             this.add.text(px, py - 24, '[ Guardar ]', {
               fontFamily: 'monospace',
-              fontSize:   '9px',
-              color:      '#FFD700',
+              fontSize: '9px',
+              color: '#FFD700',
             }).setOrigin(0.5);
             break;
           }
@@ -213,7 +213,7 @@ export class GameScene extends Phaser.Scene {
 
     // Límites del mundo = tamaño del mapa
     const mapW = MAP_LAYOUT[0].length * TILE;
-    const mapH = MAP_LAYOUT.length    * TILE;
+    const mapH = MAP_LAYOUT.length * TILE;
     this.physics.world.setBounds(0, 0, mapW, mapH);
   }
 
@@ -227,40 +227,40 @@ export class GameScene extends Phaser.Scene {
     // Mapeo de enemigos por tipo de spawn y nivel
     // (Se asignará el enemigo concreto cuando inicie la batalla)
     const normalEnemies = ['slime', 'goblin', 'dark_knight'];
-    let   normalIdx     = 0;
+    let normalIdx = 0;
 
     this._enemySpawns.forEach(spawn => {
-      const isBoss    = spawn.type === 'boss';
+      const isBoss = spawn.type === 'boss';
       const textureKey = isBoss ? 'enemy_boss' : 'enemy_slime';
-      const enemyId   = isBoss
+      const enemyId = isBoss
         ? 'chaos_dragon'
         : normalEnemies[normalIdx % normalEnemies.length];
 
       if (!isBoss) normalIdx++;
 
       const sprite = this._enemyGroup.create(spawn.x, spawn.y, textureKey);
-      sprite.setData('enemyId',  enemyId);
+      sprite.setData('enemyId', enemyId);
       sprite.setData('defeated', false);
       sprite.setImmovable(true);
 
       // Efecto de flotación suave
       this.tweens.add({
-        targets:  sprite,
-        y:        spawn.y - 6,
+        targets: sprite,
+        y: spawn.y - 6,
         duration: 1200 + Math.random() * 400,
-        yoyo:     true,
-        repeat:   -1,
-        ease:     'Sine.easeInOut',
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
       });
 
       // Aura roja para el boss
       if (isBoss) {
         this.tweens.add({
-          targets:  sprite,
-          alpha:    { from: 1, to: 0.7 },
+          targets: sprite,
+          alpha: { from: 1, to: 0.7 },
           duration: 800,
-          yoyo:     true,
-          repeat:   -1,
+          yoyo: true,
+          repeat: -1,
         });
       }
     });
@@ -354,29 +354,27 @@ export class GameScene extends Phaser.Scene {
   _onEnemyContact(player, enemySprite) {
     // Evitar disparar múltiples veces mientras se superponen
     if (enemySprite.getData('defeated')) return;
-    if (player._state === 'in_battle')  return;
+    if (player._state === 'in_battle') return;
 
     const enemyId = enemySprite.getData('enemyId');
     console.log('[GameScene] Contacto con enemigo:', enemyId);
 
-    // Marcar temporalmente para no re-disparar
+    // Marcar para no re-disparar
     enemySprite.setData('defeated', true);
-
-    // Detener al jugador
     player.enterBattle();
-
-    // Guardar referencia para eliminar el sprite si se gana
     this._currentEnemySprite = enemySprite;
 
-    // Detener HUD y lanzar batalla con fade
     this.cameras.main.fadeOut(400, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.pause(SCENES.HUD);
-      this.scene.launch(SCENES.BATTLE, {
+      // Detener HUD
+      this.scene.stop(SCENES.HUD);
+
+      // Usar scene.start en lugar de launch+pause
+      // para que BattleScene tome control total de la pantalla
+      this.scene.start(SCENES.BATTLE, {
         enemyId,
         playerData: player.serialize(),
       });
-      this.scene.pause();
     });
   }
 
@@ -394,19 +392,19 @@ export class GameScene extends Phaser.Scene {
     // Mostrar notificación flotante
     const text = this.add.text(player.x, player.y - 40, '✦ Partida guardada ✦', {
       fontFamily: 'monospace',
-      fontSize:   '12px',
-      color:      '#FFD700',
-      stroke:     '#000000',
+      fontSize: '12px',
+      color: '#FFD700',
+      stroke: '#000000',
       strokeThickness: 3,
     }).setOrigin(0.5).setDepth(20);
 
     // Animar el texto hacia arriba y desvanecerlo
     this.tweens.add({
-      targets:  text,
-      y:        text.y - 30,
-      alpha:    0,
+      targets: text,
+      y: text.y - 30,
+      alpha: 0,
       duration: 1800,
-      ease:     'Power2',
+      ease: 'Power2',
       onComplete: () => {
         text.destroy();
         this._saveDebounce = false;
@@ -428,12 +426,12 @@ export class GameScene extends Phaser.Scene {
 
     // Animación: el jugador se encoge y desvanece
     this.tweens.add({
-      targets:  player,
-      scaleX:   0,
-      scaleY:   0,
-      alpha:    0,
+      targets: player,
+      scaleX: 0,
+      scaleY: 0,
+      alpha: 0,
       duration: 600,
-      ease:     'Power2',
+      ease: 'Power2',
       onComplete: () => {
         this.scene.stop(SCENES.HUD);
         this.scene.start(SCENES.GAME_OVER, { reason: 'fall' });
@@ -450,30 +448,39 @@ export class GameScene extends Phaser.Scene {
    * - Reactiva el movimiento
    */
   _onBattleWin() {
-    console.log('[GameScene] Victoria en batalla contra:', this._defeatedEnemy);
+    console.log('[GameScene] Victoria contra:', this._defeatedEnemy);
 
-    // Actualizar stats del jugador con los datos que devuelve BattleScene
+    // Relanzar HUD
+    this.scene.launch(SCENES.HUD);
+    this.registry.set('player', this.player);
+
+    // Aplicar datos actualizados del jugador
     const updatedData = this.registry.get('battlePlayerData');
     if (updatedData && this.player) {
-      this.player.level     = updatedData.level;
-      this.player.exp       = updatedData.exp;
-      this.player.score     = updatedData.score;
-      this.player.hp        = updatedData.hp;
-      this.player.mp        = updatedData.mp;
-      this.player.inventory = updatedData.inventory;
-      this.player.skills    = updatedData.skills ?? this.player.skills;
+      this.player.level = updatedData.level;
+      this.player.exp = updatedData.exp;
+      this.player.score = updatedData.score;
+      this.player.hp = updatedData.hp;
+      this.player.mp = updatedData.mp;
+      this.player.maxHp = updatedData.maxHp ?? this.player.maxHp;
+      this.player.maxMp = updatedData.maxMp ?? this.player.maxMp;
+      this.player.attack = updatedData.attack ?? this.player.attack;
+      this.player.defense = updatedData.defense ?? this.player.defense;
+      this.player.speed = updatedData.speed ?? this.player.speed;
+      this.player.inventory = updatedData.inventory ?? this.player.inventory;
     }
 
-    // Eliminar el sprite del enemigo derrotado del mapa
-    if (this._currentEnemySprite) {
-      this._currentEnemySprite.destroy();
-      this._currentEnemySprite = null;
+    // Eliminar sprite del enemigo derrotado
+    if (this._defeatedEnemy && this._enemyGroup) {
+      this._enemyGroup.getChildren().forEach(sprite => {
+        if (sprite.getData('enemyId') === this._defeatedEnemy) {
+          sprite.destroy();
+        }
+      });
     }
 
-    // Reanudar el jugador
     this.player?.exitBattle();
 
-    // Verificar si todos los enemigos fueron derrotados
     if (this._enemyGroup.countActive() === 0) {
       this._onAllEnemiesDefeated();
     }
@@ -486,18 +493,15 @@ export class GameScene extends Phaser.Scene {
    */
   _onBattleLose() {
     console.log('[GameScene] Derrota en batalla.');
-
     try {
       const save = localStorage.getItem(STORAGE_KEYS.SAVE_SLOT);
       if (save) {
-        // Recargar la escena con los datos del último guardado
-        this.scene.restart({ battleResult: null });
+        // Reiniciar GameScene desde el guardado
+        this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
       } else {
-        this.scene.stop(SCENES.HUD);
         this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
       }
     } catch {
-      this.scene.stop(SCENES.HUD);
       this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
     }
   }
@@ -558,7 +562,7 @@ export class GameScene extends Phaser.Scene {
    */
   _setupCamera() {
     const mapW = MAP_LAYOUT[0].length * TILE;
-    const mapH = MAP_LAYOUT.length    * TILE;
+    const mapH = MAP_LAYOUT.length * TILE;
 
     this.cameras.main.setBounds(0, 0, mapW, mapH);
     this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
