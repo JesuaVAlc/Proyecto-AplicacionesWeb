@@ -17,7 +17,7 @@
  */
 
 import Phaser from 'phaser';
-import { SCENES, GAME_WIDTH, GAME_HEIGHT, STORAGE_KEYS } from '../utils/Constants.js';
+import { SCENES, PLAYER_STATES ,GAME_WIDTH, GAME_HEIGHT, STORAGE_KEYS } from '../utils/Constants.js';
 import { Player } from '../objects/Player.js';
 import { ENEMIES } from '../data/enemies.js';
 
@@ -81,6 +81,14 @@ export class GameScene extends Phaser.Scene {
     // data.battleResult: 'win' | 'lose' | undefined
     this._battleResult = data?.battleResult ?? null;
     this._defeatedEnemy = data?.enemyId ?? null;
+
+    if (data?.inventoryResult) {
+      const updated = this.registry.get('inventoryPlayerData');
+      if (updated && this.player) {
+        this.player.hp = updated.hp;
+        this.player.inventory = updated.inventory;
+      }
+    }
   }
 
   // ─── create ──────────────────────────────────────────────────────────────────
@@ -96,6 +104,16 @@ export class GameScene extends Phaser.Scene {
 
     // ── Configurar overlaps (triggers) ────────────────────────────────────
     this._setupTriggers();
+
+    // ── Configurar inputs ──────────────────────────────
+    this._setupInventoryKey();
+
+    const inventoryResult = this.registry.get('inventoryPlayerData');
+    if (inventoryResult) {
+      this.player.hp = inventoryResult.hp;
+      this.player.inventory = inventoryResult.inventory;
+      this.registry.remove('inventoryPlayerData');
+    }
 
     // ── Cámara ────────────────────────────────────────────────────────────
     this._setupCamera();
@@ -277,19 +295,13 @@ export class GameScene extends Phaser.Scene {
     let startY = 3 * TILE + TILE / 2;
 
     // Si hay partida guardada, restaurar posición
-    try {
-      const save = localStorage.getItem(STORAGE_KEYS.SAVE_SLOT);
-      if (save) {
-        const data = JSON.parse(save);
-        if (data.x && data.y) {
-          startX = data.x;
-          startY = data.y;
-        }
-        this.player = new Player(this, startX, startY, data);
-      } else {
-        this.player = new Player(this, startX, startY);
-      }
-    } catch {
+    const storage = this.registry.get('storage');
+    const save = storage.loadGame();
+    if (save) {
+      startX = save.x ?? startX;
+      startY = save.y ?? startY;
+      this.player = new Player(this, startX, startY, save);
+    } else {
       this.player = new Player(this, startX, startY);
     }
 
@@ -342,6 +354,16 @@ export class GameScene extends Phaser.Scene {
       this
     );
   }
+
+  // ───── Input ─────────────────────────────────────────────────────────────
+  _setupInventoryKey() {
+    this.input.keyboard.on('keydown-I', () => {
+      if (this.player?._state === PLAYER_STATES.IN_BATTLE) return;
+      this.scene.launch(SCENES.INVENTORY);
+      this.scene.pause();
+    });
+  }
+
 
   // ─── Callbacks de triggers ────────────────────────────────────────────────────
 
@@ -493,17 +515,7 @@ export class GameScene extends Phaser.Scene {
    */
   _onBattleLose() {
     console.log('[GameScene] Derrota en batalla.');
-    try {
-      const save = localStorage.getItem(STORAGE_KEYS.SAVE_SLOT);
-      if (save) {
-        // Reiniciar GameScene desde el guardado
-        this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
-      } else {
-        this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
-      }
-    } catch {
-      this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
-    }
+    this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
   }
 
   /**
@@ -530,28 +542,12 @@ export class GameScene extends Phaser.Scene {
    * @param {Player} player
    */
   _saveGame(player) {
-    try {
-      const saveData = player.serialize();
-      localStorage.setItem(STORAGE_KEYS.SAVE_SLOT, JSON.stringify(saveData));
-
-      // Actualizar highscore si el score actual es mayor
-      const currentHigh = parseInt(localStorage.getItem(STORAGE_KEYS.HIGHSCORE)) || 0;
-      if (player.score > currentHigh) {
-        localStorage.setItem(STORAGE_KEYS.HIGHSCORE, player.score.toString());
-        this.registry.set('highscore', player.score);
-      }
-
-      // Actualizar nivel máximo alcanzado
-      const currentMax = parseInt(localStorage.getItem(STORAGE_KEYS.MAX_LEVEL)) || 1;
-      if (player.level > currentMax) {
-        localStorage.setItem(STORAGE_KEYS.MAX_LEVEL, player.level.toString());
-        this.registry.set('maxLevelReached', player.level);
-      }
-
-      console.log('[GameScene] Partida guardada:', saveData);
-    } catch (err) {
-      console.error('[GameScene] Error al guardar:', err);
-    }
+    const storage = this.registry.get('storage');
+    storage.saveGame(player.serialize());
+    const newHigh = storage.updateHighscore(player.score);
+    if (newHigh) this.registry.set('highscore', player.score);
+    const newMax = storage.updateMaxLevel(player.level);
+    if (newMax) this.registry.set('maxLevelReached', player.level);
   }
 
   // ─── Cámara ───────────────────────────────────────────────────────────────────
@@ -574,5 +570,6 @@ export class GameScene extends Phaser.Scene {
   shutdown() {
     // Detener el HUD cuando GameScene termina
     this.scene.stop(SCENES.HUD);
+    this.input.keyboard.off('keydown-I', this._setupInventoryKey, this);
   }
 }

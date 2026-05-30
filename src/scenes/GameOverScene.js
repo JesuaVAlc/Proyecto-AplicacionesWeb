@@ -26,9 +26,7 @@ export class GameOverScene extends Phaser.Scene {
     this._reason  = data?.reason ?? 'battle';
     this._hasSave = false;
 
-    try {
-      this._hasSave = localStorage.getItem(STORAGE_KEYS.SAVE_SLOT) !== null;
-    } catch {}
+    this._hasSave = this.registry.get('storage').hasSave();
   }
 
   // ─── create ──────────────────────────────────────────────────────────────────

@@ -27,16 +27,17 @@ import {
   DIRECTIONS,
   PLAYER_SPEED,
 } from '../utils/Constants.js';
+import { DialogBox } from '../ui/DialogoBox.js';
 
 // ─── Definición de pasos del tutorial ─────────────────────────────────────────
 
 const TUTORIAL_STEPS = [
   // ── Sección 1: Movimiento ──────────────────────────────────────────────────
   {
-    id:      'move_intro',
-    type:    'theory',
+    id: 'move_intro',
+    type: 'theory',
     section: 'Movimiento',
-    title:   '¡Bienvenido, aventurero!',
+    title: '¡Bienvenido, aventurero!',
     lines: [
       'En tu travesía explorarás tierras peligrosas.',
       'Primero aprenderás a moverte por el mundo.',
@@ -45,48 +46,48 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:       'move_up',
-    type:     'practice',
-    section:  'Movimiento',
-    title:    'Practica: Mover arriba',
-    prompt:   'Pulsa W para moverte hacia arriba.',
-    action:   'move_up',
-    hint:     '[W] ↑ Arriba',
+    id: 'move_up',
+    type: 'practice',
+    section: 'Movimiento',
+    title: 'Practica: Mover arriba',
+    prompt: 'Pulsa W para moverte hacia arriba.',
+    action: 'move_up',
+    hint: '[W] ↑ Arriba',
   },
   {
-    id:       'move_down',
-    type:     'practice',
-    section:  'Movimiento',
-    title:    'Practica: Mover abajo',
-    prompt:   'Pulsa S para moverte hacia abajo.',
-    action:   'move_down',
-    hint:     '[S] ↓ Abajo',
+    id: 'move_down',
+    type: 'practice',
+    section: 'Movimiento',
+    title: 'Practica: Mover abajo',
+    prompt: 'Pulsa S para moverte hacia abajo.',
+    action: 'move_down',
+    hint: '[S] ↓ Abajo',
   },
   {
-    id:       'move_left',
-    type:     'practice',
-    section:  'Movimiento',
-    title:    'Practica: Mover izquierda',
-    prompt:   'Pulsa A para moverte hacia la izquierda.',
-    action:   'move_left',
-    hint:     '[A] ← Izquierda',
+    id: 'move_left',
+    type: 'practice',
+    section: 'Movimiento',
+    title: 'Practica: Mover izquierda',
+    prompt: 'Pulsa A para moverte hacia la izquierda.',
+    action: 'move_left',
+    hint: '[A] ← Izquierda',
   },
   {
-    id:       'move_right',
-    type:     'practice',
-    section:  'Movimiento',
-    title:    'Practica: Mover derecha',
-    prompt:   'Pulsa D para moverte hacia la derecha.',
-    action:   'move_right',
-    hint:     '[D] → Derecha',
+    id: 'move_right',
+    type: 'practice',
+    section: 'Movimiento',
+    title: 'Practica: Mover derecha',
+    prompt: 'Pulsa D para moverte hacia la derecha.',
+    action: 'move_right',
+    hint: '[D] → Derecha',
   },
 
   // ── Sección 2: Combate ─────────────────────────────────────────────────────
   {
-    id:      'battle_intro',
-    type:    'theory',
+    id: 'battle_intro',
+    type: 'theory',
     section: 'Combate',
-    title:   'Sistema de Combate',
+    title: 'Sistema de Combate',
     lines: [
       'El combate es por turnos, igual que los RPG clásicos.',
       'En tu turno eliges: Atacar, Habilidad, Objeto o Huir.',
@@ -95,10 +96,10 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:      'battle_attack',
-    type:    'theory',
+    id: 'battle_attack',
+    type: 'theory',
     section: 'Combate',
-    title:   'Ataque básico',
+    title: 'Ataque básico',
     lines: [
       '⚔  ATACAR: golpe directo sin costo de MP.',
       '   El daño depende de tu ATK vs la DEF enemiga.',
@@ -107,10 +108,10 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:      'battle_defense',
-    type:    'theory',
+    id: 'battle_defense',
+    type: 'theory',
     section: 'Combate',
-    title:   'Turno enemigo',
+    title: 'Turno enemigo',
     lines: [
       '🛡  Tras tu acción, el enemigo actúa automáticamente.',
       '   Los enemigos tienen distintas IAs de comportamiento.',
@@ -119,23 +120,23 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:       'battle_select',
-    type:     'practice',
-    section:  'Combate',
-    title:    'Practica: Seleccionar acción',
-    prompt:   'Usa ↑ ↓ para navegar el menú y ESPACIO para confirmar.\nSelecciona "Atacar".',
-    action:   'battle_select_attack',
-    hint:     '[↑↓] Navegar  [SPACE] Confirmar',
+    id: 'battle_select',
+    type: 'practice',
+    section: 'Combate',
+    title: 'Practica: Seleccionar acción',
+    prompt: 'Usa ↑ ↓ para navegar el menú y ESPACIO para confirmar.\nSelecciona "Atacar".',
+    action: 'battle_select_attack',
+    hint: '[↑↓] Navegar  [SPACE] Confirmar',
     // En esta práctica mostramos un menú de batalla simulado
     mockBattle: true,
   },
 
   // ── Sección 3: Habilidades ─────────────────────────────────────────────────
   {
-    id:      'skills_intro',
-    type:    'theory',
+    id: 'skills_intro',
+    type: 'theory',
     section: 'Habilidades',
-    title:   'Sistema de Habilidades',
+    title: 'Sistema de Habilidades',
     lines: [
       '✨ Las habilidades gastan MP pero son más poderosas.',
       '   Hay 4 tipos: Ataque, Curación, Buff y Debuff.',
@@ -144,10 +145,10 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:      'skills_types',
-    type:    'theory',
+    id: 'skills_types',
+    type: 'theory',
     section: 'Habilidades',
-    title:   'Tipos de habilidad',
+    title: 'Tipos de habilidad',
     lines: [
       '⚔  ATAQUE  — daño mágico directo al enemigo.',
       '💚 CURAR   — restaura HP propio.',
@@ -156,22 +157,22 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:       'skills_select',
-    type:     'practice',
-    section:  'Habilidades',
-    title:    'Practica: Usar una habilidad',
-    prompt:   'Abre el menú de habilidades y selecciona\ncualquier habilidad de la lista.',
-    action:   'skills_open',
-    hint:     '[↑↓] Navegar  [SPACE] Confirmar',
+    id: 'skills_select',
+    type: 'practice',
+    section: 'Habilidades',
+    title: 'Practica: Usar una habilidad',
+    prompt: 'Abre el menú de habilidades y selecciona\ncualquier habilidad de la lista.',
+    action: 'skills_open',
+    hint: '[↑↓] Navegar  [SPACE] Confirmar',
     mockSkills: true,
   },
 
   // ── Sección 4: Inventario ──────────────────────────────────────────────────
   {
-    id:      'inventory_intro',
-    type:    'theory',
+    id: 'inventory_intro',
+    type: 'theory',
     section: 'Inventario',
-    title:   'Inventario y Objetos',
+    title: 'Inventario y Objetos',
     lines: [
       '🎒 Tu inventario guarda objetos de consumo.',
       '   Los objetos se usan en combate o en el mapa.',
@@ -180,10 +181,10 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:      'inventory_items',
-    type:    'theory',
+    id: 'inventory_items',
+    type: 'theory',
     section: 'Inventario',
-    title:   'Objetos disponibles',
+    title: 'Objetos disponibles',
     lines: [
       '🧪 Poción       — restaura 50 HP.',
       '🔵 Éter         — restaura 30 MP.',
@@ -192,22 +193,22 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
-    id:       'inventory_use',
-    type:     'practice',
-    section:  'Inventario',
-    title:    'Practica: Usar un objeto',
-    prompt:   'Selecciona un objeto del inventario\ny úsalo con ESPACIO.',
-    action:   'inventory_use',
-    hint:     '[↑↓] Navegar  [SPACE] Usar objeto',
+    id: 'inventory_use',
+    type: 'practice',
+    section: 'Inventario',
+    title: 'Practica: Usar un objeto',
+    prompt: 'Selecciona un objeto del inventario\ny úsalo con ESPACIO.',
+    action: 'inventory_use',
+    hint: '[↑↓] Navegar  [SPACE] Usar objeto',
     mockInventory: true,
   },
 
   // ── Final ──────────────────────────────────────────────────────────────────
   {
-    id:      'end',
-    type:    'theory',
+    id: 'end',
+    type: 'theory',
     section: 'Fin',
-    title:   '¡Tutorial completado!',
+    title: '¡Tutorial completado!',
     lines: [
       '🏆 ¡Excelente! Ya conoces lo esencial del juego.',
       '   Ahora estás listo para comenzar tu aventura.',
@@ -219,11 +220,11 @@ const TUTORIAL_STEPS = [
 
 // ─── Colores de sección ────────────────────────────────────────────────────────
 const SECTION_COLORS = {
-  'Movimiento':  0x4488FF,
-  'Combate':     0xFF4444,
+  'Movimiento': 0x4488FF,
+  'Combate': 0xFF4444,
   'Habilidades': 0xCC44FF,
-  'Inventario':  0x44CC88,
-  'Fin':         0xFFD700,
+  'Inventario': 0x44CC88,
+  'Fin': 0xFFD700,
 };
 
 export class TutorialScene extends Phaser.Scene {
@@ -238,11 +239,11 @@ export class TutorialScene extends Phaser.Scene {
    * Inicializa el estado interno antes de crear objetos.
    */
   init() {
-    this._stepIndex      = 0;
-    this._practiceOk     = false;   // true cuando el jugador completó la práctica actual
-    this._inputLocked    = false;   // evita doble-pulsación rápida
-    this._mockMenuIndex  = 0;       // índice seleccionado en menús simulados
-    this._mockOptions    = [];      // opciones del menú simulado activo
+    this._stepIndex = 0;
+    this._practiceOk = false;   // true cuando el jugador completó la práctica actual
+    this._inputLocked = false;   // evita doble-pulsación rápida
+    this._mockMenuIndex = 0;       // índice seleccionado en menús simulados
+    this._mockOptions = [];      // opciones del menú simulado activo
   }
 
   // ─── create ───────────────────────────────────────────────────────────────────
@@ -250,10 +251,18 @@ export class TutorialScene extends Phaser.Scene {
   create() {
     this._buildBackground();
     this._buildHeaderBar();
-    this._buildDialogBox();
     this._buildPlayerSprite();
     this._buildArena();
     this._buildInputs();
+    const boxH = 160;
+    const boxY = GAME_HEIGHT - boxH - 8;
+
+    this._dialog = new DialogBox(
+      this,
+      8, boxY,
+      GAME_WIDTH - 16, boxH,
+      { mode: 'dialog', depth: 5 }
+    );
 
     // Renderizar el primer paso
     this._showStep(0);
@@ -270,7 +279,7 @@ export class TutorialScene extends Phaser.Scene {
     if (!step || step.type !== 'practice') return;
     if (this._practiceOk) return;
 
-    const isMove = ['move_up','move_down','move_left','move_right'].includes(step.action);
+    const isMove = ['move_up', 'move_down', 'move_left', 'move_right'].includes(step.action);
     if (isMove) this._updateMovement(step);
   }
 
@@ -313,103 +322,16 @@ export class TutorialScene extends Phaser.Scene {
     // Texto de sección (se actualiza en _showStep)
     this._sectionText = this.add.text(16, 20, '', {
       fontFamily: 'monospace',
-      fontSize:   '14px',
-      color:      '#FFD700',
+      fontSize: '14px',
+      color: '#FFD700',
     }).setOrigin(0, 0.5);
 
     // Progreso "paso X de Y"
     this._progressText = this.add.text(GAME_WIDTH - 16, 20, '', {
       fontFamily: 'monospace',
-      fontSize:   '12px',
-      color:      '#AAAAAA',
+      fontSize: '12px',
+      color: '#AAAAAA',
     }).setOrigin(1, 0.5);
-  }
-
-  /**
-   * Caja de diálogo inferior estilo FF clásico.
-   * Contiene: título, líneas de texto, hint de teclas.
-   */
-  _buildDialogBox() {
-    const boxH  = 160;
-    const boxY  = GAME_HEIGHT - boxH - 8;
-    const pad   = 16;
-
-    // Fondo con borde dorado + borde interno azul
-    this._dialogBg = this.add.rectangle(
-      GAME_WIDTH / 2, boxY + boxH / 2,
-      GAME_WIDTH - 16, boxH,
-      0x000033, 0.96
-    );
-    this.add.rectangle(
-      GAME_WIDTH / 2, boxY + boxH / 2,
-      GAME_WIDTH - 16, boxH,
-      0x000000, 0
-    ).setStrokeStyle(2, 0xFFD700);
-    this.add.rectangle(
-      GAME_WIDTH / 2, boxY + boxH / 2,
-      GAME_WIDTH - 22, boxH - 6,
-      0x000000, 0
-    ).setStrokeStyle(1, 0x4488FF);
-
-    // Indicador de sección (rectángulo de color)
-    this._sectionBar = this.add.rectangle(
-      pad + 4, boxY + 2,
-      6, boxH - 4,
-      0xFFD700
-    ).setOrigin(0, 0);
-
-    // Título del paso
-    this._titleText = this.add.text(pad + 16, boxY + 14, '', {
-      fontFamily: 'monospace',
-      fontSize:   '16px',
-      color:      '#FFD700',
-      stroke:     '#000000',
-      strokeThickness: 2,
-    });
-
-    // Líneas de contenido
-    this._contentLines = [];
-    for (let i = 0; i < 4; i++) {
-      this._contentLines.push(
-        this.add.text(pad + 16, boxY + 38 + i * 24, '', {
-          fontFamily: 'monospace',
-          fontSize:   '13px',
-          color:      '#DDDDDD',
-        })
-      );
-    }
-
-    // Hint de tecla (esquina inferior derecha del diálogo)
-    this._hintText = this.add.text(
-      GAME_WIDTH - pad - 8,
-      boxY + boxH - 14,
-      '',
-      {
-        fontFamily: 'monospace',
-        fontSize:   '11px',
-        color:      '#888888',
-      }
-    ).setOrigin(1, 1);
-
-    // Cursor parpadeante "▼" cuando es theory
-    this._cursor = this.add.text(
-      GAME_WIDTH - pad - 8,
-      boxY + boxH - 16,
-      '▼',
-      {
-        fontFamily: 'monospace',
-        fontSize:   '14px',
-        color:      '#FFD700',
-      }
-    ).setOrigin(1, 1).setVisible(false);
-
-    this.tweens.add({
-      targets:  this._cursor,
-      alpha:    0,
-      duration: 500,
-      yoyo:     true,
-      repeat:   -1,
-    });
   }
 
   /**
@@ -457,12 +379,12 @@ export class TutorialScene extends Phaser.Scene {
    */
   _buildInputs() {
     this._keys = this.input.keyboard.addKeys({
-      up:     Phaser.Input.Keyboard.KeyCodes.W,
-      down:   Phaser.Input.Keyboard.KeyCodes.S,
-      left:   Phaser.Input.Keyboard.KeyCodes.A,
-      right:  Phaser.Input.Keyboard.KeyCodes.D,
-      space:  Phaser.Input.Keyboard.KeyCodes.SPACE,
-      esc:    Phaser.Input.Keyboard.KeyCodes.ESC,
+      up: Phaser.Input.Keyboard.KeyCodes.W,
+      down: Phaser.Input.Keyboard.KeyCodes.S,
+      left: Phaser.Input.Keyboard.KeyCodes.A,
+      right: Phaser.Input.Keyboard.KeyCodes.D,
+      space: Phaser.Input.Keyboard.KeyCodes.SPACE,
+      esc: Phaser.Input.Keyboard.KeyCodes.ESC,
       arrowU: Phaser.Input.Keyboard.KeyCodes.UP,
       arrowD: Phaser.Input.Keyboard.KeyCodes.DOWN,
     });
@@ -479,7 +401,7 @@ export class TutorialScene extends Phaser.Scene {
     });
 
     // Flechas para navegar menús simulados
-    this.input.keyboard.on('keydown-UP',   () => this._onArrowNav(-1));
+    this.input.keyboard.on('keydown-UP', () => this._onArrowNav(-1));
     this.input.keyboard.on('keydown-DOWN', () => this._onArrowNav(1));
   }
 
@@ -491,7 +413,7 @@ export class TutorialScene extends Phaser.Scene {
    * @param {number} index - Índice en TUTORIAL_STEPS
    */
   _showStep(index) {
-    this._stepIndex  = index;
+    this._stepIndex = index;
     this._practiceOk = false;
     this._inputLocked = false;
 
@@ -500,23 +422,18 @@ export class TutorialScene extends Phaser.Scene {
 
     // ── Header ────────────────────────────────────────────────────────────────
     const color = SECTION_COLORS[step.section] ?? 0xFFFFFF;
-    this._sectionText.setText(`📖 ${step.section}`).setColor(
-      '#' + color.toString(16).padStart(6, '0')
-    );
+    this._sectionText.setText(`📖 ${step.section}`)
+      .setColor('#' + color.toString(16).padStart(6, '0'));
     this._progressText.setText(`${index + 1} / ${TUTORIAL_STEPS.length}`);
-    this._sectionBar.setFillStyle(color);
 
     // ── Título ────────────────────────────────────────────────────────────────
     this._titleText.setText(step.title);
 
     // ── Limpiar contenido anterior ────────────────────────────────────────────
-    this._contentLines.forEach(t => t.setText(''));
-    this._hintText.setText('');
-    this._cursor.setVisible(false);
-    this._player.setVisible(false);
-    this._arenaGraphic.setVisible(false);
-    this._clearMockMenu();
-
+    this._dialog.setSectionColor(color);
+    this._dialog.setTitle(step.title);
+    this._dialog.resetLineColors();
+    this._dialog.setCursorVisible(false);
     // ── Renderizar según tipo ─────────────────────────────────────────────────
     if (step.type === 'theory') {
       this._renderTheory(step);
@@ -533,13 +450,9 @@ export class TutorialScene extends Phaser.Scene {
    * @param {object} step
    */
   _renderTheory(step) {
-    step.lines.forEach((line, i) => {
-      if (this._contentLines[i]) {
-        this._contentLines[i].setText(line);
-      }
-    });
-    this._cursor.setVisible(true);
-    this._hintText.setText('[SPACE] Continuar  [ESC] Salir');
+    this._dialog.setLines(step.lines);
+    this._dialog.setCursorVisible(true);
+    this._dialog.setHint('[SPACE] Continuar  [ESC] Salir');
   }
 
   /**
@@ -549,24 +462,9 @@ export class TutorialScene extends Phaser.Scene {
   _renderPractice(step) {
     // Prompt partido en dos líneas si tiene \n
     const [line0, line1] = step.prompt.split('\n');
-    if (this._contentLines[0]) this._contentLines[0].setText(`▶ ${line0}`);
-    if (this._contentLines[1] && line1) this._contentLines[1].setText(`  ${line1}`);
-
-    this._hintText.setText(step.hint + '   [ESC] Salir');
-
-    // Mostrar arena de movimiento
-    const isMove = ['move_up','move_down','move_left','move_right'].includes(step.action);
-    if (isMove) {
-      this._player.setTexture('player_down')
-                  .setPosition(this._playerStartX, this._playerStartY)
-                  .setVisible(true);
-      this._arenaGraphic.setVisible(true);
-    }
-
-    // Mostrar menú simulado de batalla
-    if (step.mockBattle)    this._buildMockBattleMenu();
-    if (step.mockSkills)    this._buildMockSkillsMenu();
-    if (step.mockInventory) this._buildMockInventoryMenu();
+    this._dialog.setLines([`▶ ${line0}`, line1 ? `  ${line1}` : '', '', '']);
+    this._dialog.setCursorVisible(false);
+    this._dialog.setHint(`${step.hint}   [ESC] Salir`);
   }
 
   /**
@@ -637,13 +535,13 @@ export class TutorialScene extends Phaser.Scene {
     const speed = 3;
     let dx = 0, dy = 0;
 
-    if (Phaser.Input.Keyboard.JustDown(this._keys.up))    dy = -speed;
-    if (Phaser.Input.Keyboard.JustDown(this._keys.down))  dy =  speed;
-    if (Phaser.Input.Keyboard.JustDown(this._keys.left))  dx = -speed;
-    if (Phaser.Input.Keyboard.JustDown(this._keys.right)) dx =  speed;
+    if (Phaser.Input.Keyboard.JustDown(this._keys.up)) dy = -speed;
+    if (Phaser.Input.Keyboard.JustDown(this._keys.down)) dy = speed;
+    if (Phaser.Input.Keyboard.JustDown(this._keys.left)) dx = -speed;
+    if (Phaser.Input.Keyboard.JustDown(this._keys.right)) dx = speed;
 
     // Actualizar textura según dirección
-    if      (dy < 0) this._player.setTexture('player_up');
+    if (dy < 0) this._player.setTexture('player_up');
     else if (dy > 0) this._player.setTexture('player_down');
     else if (dx < 0) this._player.setTexture('player_left');
     else if (dx > 0) this._player.setTexture('player_right');
@@ -675,10 +573,10 @@ export class TutorialScene extends Phaser.Scene {
    */
   _checkMoveCompleted(step, dx, dy) {
     const map = {
-      move_up:    { dx: 0,  dy: -1 },
-      move_down:  { dx: 0,  dy:  1 },
-      move_left:  { dx: -1, dy:  0 },
-      move_right: { dx:  1, dy:  0 },
+      move_up: { dx: 0, dy: -1 },
+      move_down: { dx: 0, dy: 1 },
+      move_left: { dx: -1, dy: 0 },
+      move_right: { dx: 1, dy: 0 },
     };
     const req = map[step.action];
     if (!req) return;
@@ -699,8 +597,8 @@ export class TutorialScene extends Phaser.Scene {
    * Construye el menú simulado de batalla con las 4 opciones.
    */
   _buildMockBattleMenu() {
-    this._mockOptions    = ['⚔  Atacar', '✨ Habilidad', '🎒 Objeto', '🏃 Huir'];
-    this._mockMenuIndex  = 0;
+    this._mockOptions = ['⚔  Atacar', '✨ Habilidad', '🎒 Objeto', '🏃 Huir'];
+    this._mockMenuIndex = 0;
     this._buildMockMenuUI(280, 80, 'BATALLA');
   }
 
@@ -708,7 +606,7 @@ export class TutorialScene extends Phaser.Scene {
    * Construye el menú simulado de habilidades.
    */
   _buildMockSkillsMenu() {
-    this._mockOptions   = ['🔥 Llama Lvl1', '💧 Aqua Lvl1', '⚡ Rayo Lvl2', '💚 Curar Lvl1'];
+    this._mockOptions = ['🔥 Llama Lvl1', '💧 Aqua Lvl1', '⚡ Rayo Lvl2', '💚 Curar Lvl1'];
     this._mockMenuIndex = 0;
     this._buildMockMenuUI(300, 80, 'HABILIDADES');
   }
@@ -717,7 +615,7 @@ export class TutorialScene extends Phaser.Scene {
    * Construye el menú simulado de inventario.
    */
   _buildMockInventoryMenu() {
-    this._mockOptions   = ['🧪 Poción  ×3', '🔵 Éter    ×1', '💊 Mega P. ×1', '⭐ Elixir  ×1'];
+    this._mockOptions = ['🧪 Poción  ×3', '🔵 Éter    ×1', '💊 Mega P. ×1', '⭐ Elixir  ×1'];
     this._mockMenuIndex = 0;
     this._buildMockMenuUI(300, 80, 'INVENTARIO');
   }
@@ -732,8 +630,8 @@ export class TutorialScene extends Phaser.Scene {
     this._clearMockMenu();
 
     const totalH = menuH + this._mockOptions.length * 36;
-    const cx     = GAME_WIDTH / 2;
-    const cy     = 190;
+    const cx = GAME_WIDTH / 2;
+    const cy = 190;
 
     // Fondo del panel
     const bg = this.add.rectangle(cx, cy, menuW, totalH, 0x000044, 0.95)
@@ -742,8 +640,8 @@ export class TutorialScene extends Phaser.Scene {
     // Título del panel
     const title = this.add.text(cx, cy - totalH / 2 + 16, label, {
       fontFamily: 'monospace',
-      fontSize:   '13px',
-      color:      '#FFD700',
+      fontSize: '13px',
+      color: '#FFD700',
     }).setOrigin(0.5, 0);
 
     // Línea divisoria
@@ -759,15 +657,15 @@ export class TutorialScene extends Phaser.Scene {
       // Cursor "▶"
       const arrow = this.add.text(cx - menuW / 2 + 12, oy, '▶', {
         fontFamily: 'monospace',
-        fontSize:   '13px',
-        color:      '#FFD700',
+        fontSize: '13px',
+        color: '#FFD700',
       }).setOrigin(0, 0.5).setVisible(i === 0);
 
       // Texto de la opción
       const optText = this.add.text(cx - menuW / 2 + 28, oy, opt, {
         fontFamily: 'monospace',
-        fontSize:   '13px',
-        color:      i === 0 ? '#FFFFFF' : '#AAAAAA',
+        fontSize: '13px',
+        color: i === 0 ? '#FFFFFF' : '#AAAAAA',
       }).setOrigin(0, 0.5);
 
       this._mockOptionTexts.push(optText);
@@ -830,10 +728,10 @@ export class TutorialScene extends Phaser.Scene {
     if (!this._mockContainer) return;
     this._mockContainer.removeAll(true);
     this._mockContainer.setVisible(false);
-    this._mockOptions       = [];
-    this._mockOptionTexts   = [];
-    this._mockCursorArrow   = [];
-    this._mockMenuIndex     = 0;
+    this._mockOptions = [];
+    this._mockOptionTexts = [];
+    this._mockCursorArrow = [];
+    this._mockMenuIndex = 0;
   }
 
   // ─── Feedback de práctica ─────────────────────────────────────────────────────
@@ -844,15 +742,14 @@ export class TutorialScene extends Phaser.Scene {
    */
   _showPracticeSuccess() {
     // Cambiar color del prompt a verde
-    if (this._contentLines[0]) {
-      this._contentLines[0].setColor('#44FF88');
-    }
-    if (this._contentLines[1]) {
-      this._contentLines[1].setColor('#44FF88');
-    }
-    if (this._contentLines[2]) {
-      this._contentLines[2].setText('✔ ¡Correcto! Muy bien...').setColor('#44FF88');
-    }
+    this._dialog.setLineColor(0, '#44FF88');
+    this._dialog.setLineColor(1, '#44FF88');
+    this._dialog.setLines([
+      ...this._dialog._contentStrs.slice(0, 2),
+      '✔ ¡Correcto! Muy bien...',
+      ''
+    ]);
+    this._dialog.setLineColor(2, '#44FF88');
 
     // Flash verde
     this.cameras.main.flash(300, 0, 255, 100, false);
@@ -868,16 +765,18 @@ export class TutorialScene extends Phaser.Scene {
    * @param {string} msg
    */
   _showWrongSelection(msg) {
-    if (this._contentLines[2]) {
-      this._contentLines[2].setText(`✗ ${msg}`).setColor('#FF4444');
-    }
-    this.cameras.main.shake(200, 0.005);
-
-    // Borrar el mensaje de error tras 1.5 s
-    this.time.delayedCall(1500, () => {
-      if (this._contentLines[2]) {
-        this._contentLines[2].setText('').setColor('#DDDDDD');
-      }
+    this._dialog.setLineColor(2, '#FF4444');
+    this._dialog.setLines([
+      ...this._dialog._contentStrs.slice(0, 2),
+      `✗ ${msg}`,
+      ''
+    ]);
+    this._scene.time.delayedCall(1500, () => {
+      this._dialog.setLineColor(2, '#DDDDDD');
+      this._dialog.setLines([
+        ...this._dialog._contentStrs.slice(0, 2),
+        '', ''
+      ]);
     });
   }
 
@@ -887,20 +786,7 @@ export class TutorialScene extends Phaser.Scene {
    * Animación de entrada de la caja de diálogo (desliza desde abajo).
    */
   _animateDialogIn() {
-    const targets = [
-      this._titleText,
-      ...this._contentLines,
-      this._hintText,
-    ];
-    targets.forEach(t => { t.setAlpha(0); });
-
-    this.tweens.add({
-      targets,
-      alpha:    1,
-      duration: 180,
-      ease:     'Linear',
-      delay:    this.tweens.stagger(40),
-    });
+    this._dialog.animateIn();
   }
 
   // ─── Salir ────────────────────────────────────────────────────────────────────
@@ -916,4 +802,14 @@ export class TutorialScene extends Phaser.Scene {
       this.scene.start(SCENES.MENU);
     });
   }
+  shutdown() {
+    this.input.keyboard.off('keydown-SPACE', () => this._onSpacePressed());
+    this.input.keyboard.off('keydown-ESC', () => this._exitTutorial());
+    this.input.keyboard.off('keydown-UP', () => this._onArrowNav(-1));
+    this.input.keyboard.off('keydown-DOWN', () => this._onArrowNav(1));
+
+    this._dialog.destroy();
+  }
+
 }
+

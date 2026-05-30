@@ -20,16 +20,18 @@
 import Phaser from 'phaser';
 import { SCENES, GAME_WIDTH, GAME_HEIGHT, HUD, STORAGE_KEYS, AUDIO } from '../utils/Constants.js';
 import { getLevelData } from '../data/levels.js';
+import { HealthBar } from '../ui/HealthBar.js';
+import { MiniMap } from '../ui/MiniMap.js';
 
 // Posición y tamaño del panel izquierdo del HUD
-const PANEL_X      = 8;
-const PANEL_Y      = 8;
-const PANEL_W      = 180;
-const PANEL_H      = 110;
+const PANEL_X = 8;
+const PANEL_Y = 8;
+const PANEL_W = 180;
+const PANEL_H = 110;
 
 // Posición del minimapa (esquina superior derecha)
-const MINI_X       = GAME_WIDTH  - HUD.MINIMAP_SIZE - 10;
-const MINI_Y       = 10;
+const MINI_X = GAME_WIDTH - HUD.MINIMAP_SIZE - 10;
+const MINI_Y = 10;
 
 export class HUDScene extends Phaser.Scene {
 
@@ -43,8 +45,15 @@ export class HUDScene extends Phaser.Scene {
     this._createBars();
     this._createCharacterPortrait();
     this._createLevelDisplay();
-    this._createMinimap();
     this._createMuteButton();
+    this._minimap = new MiniMap(
+      this,
+      MINI_X, MINI_Y,
+      HUD.MINIMAP_SIZE,
+      40 * 32,  // MAP_COLS * TILE
+      30 * 32,  // MAP_ROWS * TILE
+      { depth: 10 }
+    );
 
     // Referencia al jugador via registry (GameScene lo pone ahí)
     this._player = this.registry.get('player');
@@ -57,10 +66,17 @@ export class HUDScene extends Phaser.Scene {
 
   // ─── update ──────────────────────────────────────────────────────────────────
   update() {
-    // Actualizar referencia al jugador en cada frame
-    // (puede cambiar si la escena se reinicia)
     this._player = this.registry.get('player');
     if (!this._player) return;
+
+    // Pasar los grupos al minimapa la primera vez que estén disponibles
+    if (!this._minimapReady) {
+      const gameScene = this.scene.get(SCENES.GAME);
+      if (gameScene?._enemyGroup && gameScene?._saveZones) {
+        this._minimap.setGroups(gameScene._enemyGroup, gameScene._saveZones);
+        this._minimapReady = true;
+      }
+    }
 
     this._updateAll();
   }
@@ -93,67 +109,32 @@ export class HUDScene extends Phaser.Scene {
   _createBars() {
     // Posición X de inicio de las barras (deja espacio al retrato)
     const barStartX = PANEL_X + 52;
-    const barW      = PANEL_W - 60;
-
-    // ── HP ────────────────────────────────────────────────────────────────
-    const hpY = PANEL_Y + 20;
-
-    this.add.text(barStartX - 2, hpY - 1, 'HP', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#FF6666',
-    });
-
-    // Fondo de barra HP
-    this._hpBarBg = this.add.graphics();
-    this._hpBarBg.fillStyle(0x330000);
-    this._hpBarBg.fillRect(barStartX, hpY + 10, barW, 10);
-    this._hpBarBg.lineStyle(1, 0xFF4444, 0.6);
-    this._hpBarBg.strokeRect(barStartX, hpY + 10, barW, 10);
-
-    // Relleno dinámico HP
-    this._hpBar = this.add.graphics();
-
-    // Texto HP numérico
-    this._hpText = this.add.text(barStartX + barW / 2, hpY + 10, '---/---', {
-      fontFamily: 'monospace', fontSize: '8px', color: '#FFFFFF',
-    }).setOrigin(0.5, 0);
-
-    // ── MP ────────────────────────────────────────────────────────────────
-    const mpY = PANEL_Y + 48;
-
-    this.add.text(barStartX - 2, mpY - 1, 'MP', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#6688FF',
-    });
-
-    this._mpBarBg = this.add.graphics();
-    this._mpBarBg.fillStyle(0x000033);
-    this._mpBarBg.fillRect(barStartX, mpY + 10, barW, 10);
-    this._mpBarBg.lineStyle(1, 0x4466FF, 0.6);
-    this._mpBarBg.strokeRect(barStartX, mpY + 10, barW, 10);
-
-    this._mpBar  = this.add.graphics();
-
-    this._mpText = this.add.text(barStartX + barW / 2, mpY + 10, '---/---', {
-      fontFamily: 'monospace', fontSize: '8px', color: '#FFFFFF',
-    }).setOrigin(0.5, 0);
-
-    // ── EXP ───────────────────────────────────────────────────────────────
-    const expY = PANEL_Y + 76;
-
-    this.add.text(barStartX - 2, expY - 1, 'EXP', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#FFDD44',
-    });
-
-    this._expBarBg = this.add.graphics();
-    this._expBarBg.fillStyle(0x222200);
-    this._expBarBg.fillRect(barStartX, expY + 10, barW, 8);
-    this._expBarBg.lineStyle(1, 0xFFDD44, 0.5);
-    this._expBarBg.strokeRect(barStartX, expY + 10, barW, 8);
-
-    this._expBar  = this.add.graphics();
-
-    this._expText = this.add.text(barStartX + barW / 2, expY + 10, '', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#FFDD44',
-    }).setOrigin(0.5, 0);
+    const barW = PANEL_W - 60;
+    const baseOpts = { depth: 10 };
+    // HP
+    this._hpBar = new HealthBar(
+      this, barStartX, PANEL_Y + 30, barW, 10, 0xFF4444,
+      {
+        label: 'HP', labelColor: '#FF6666', textPos: 'inside',
+        bgColor: 0x330000, lowThreshold: 0.25, ...baseOpts
+      }
+    );
+    // MP
+    this._mpBar = new HealthBar(
+      this, barStartX, PANEL_Y + 58, barW, 10, 0x4488FF,
+      {
+        label: 'MP', labelColor: '#6688FF', textPos: 'inside',
+        bgColor: 0x000033, ...baseOpts
+      }
+    );
+    // EXP
+    this._expBar = new HealthBar(
+      this, barStartX, PANEL_Y + 86, barW, 8, 0xFFDD44,
+      {
+        label: 'EXP', labelColor: '#FFDD44', textPos: 'inside',
+        bgColor: 0x222200, ...baseOpts
+      }
+    );
   }
 
   /**
@@ -180,9 +161,9 @@ export class HUDScene extends Phaser.Scene {
   _createLevelDisplay() {
     this._levelText = this.add.text(PANEL_X + 25, PANEL_Y + 50, 'LV 1', {
       fontFamily: 'monospace',
-      fontSize:   '9px',
-      color:      '#FFD700',
-      stroke:     '#000000',
+      fontSize: '9px',
+      color: '#FFD700',
+      stroke: '#000000',
       strokeThickness: 2,
     }).setOrigin(0.5, 0);
   }
@@ -218,12 +199,12 @@ export class HUDScene extends Phaser.Scene {
    * Pulsar M o hacer clic en él alterna el audio.
    */
   _createMuteButton() {
-    const bx = GAME_WIDTH  - 36;
+    const bx = GAME_WIDTH - 36;
     const by = GAME_HEIGHT - 20;
 
     // Leer estado de mute del registry
     const audioConfig = this.registry.get('audioConfig') ?? {};
-    this._muted       = audioConfig.muted ?? AUDIO.DEFAULT_MUTED;
+    this._muted = audioConfig.muted ?? AUDIO.DEFAULT_MUTED;
 
     // Fondo del botón
     this._muteBg = this.add.graphics();
@@ -232,7 +213,7 @@ export class HUDScene extends Phaser.Scene {
     // Texto del botón
     this._muteText = this.add.text(bx, by, this._muted ? '🔇' : '🔊', {
       fontFamily: 'monospace',
-      fontSize:   '14px',
+      fontSize: '14px',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     // Click con ratón
@@ -246,7 +227,7 @@ export class HUDScene extends Phaser.Scene {
    * Dibuja el fondo del botón de mute según el estado actual.
    */
   _drawMuteButton() {
-    const bx = GAME_WIDTH  - 52;
+    const bx = GAME_WIDTH - 52;
     const by = GAME_HEIGHT - 30;
     this._muteBg.clear();
     this._muteBg.fillStyle(this._muted ? 0x440000 : 0x003300, 0.8);
@@ -272,7 +253,7 @@ export class HUDScene extends Phaser.Scene {
       audioConfig.muted = this._muted;
       this.registry.set('audioConfig', audioConfig);
       localStorage.setItem(STORAGE_KEYS.AUDIO_CONFIG, JSON.stringify(audioConfig));
-    } catch {}
+    } catch { }
 
     console.log('[HUDScene] Mute:', this._muted);
   }
@@ -287,27 +268,19 @@ export class HUDScene extends Phaser.Scene {
     const p = this._player;
     if (!p) return;
 
-    this._updateBar(this._hpBar, p.hp, p.maxHp,
-      PANEL_X + 52, PANEL_Y + 30, PANEL_W - 60, 10, 0xFF4444);
-    this._hpText.setText(`${p.hp}/${p.maxHp}`);
-
-    this._updateBar(this._mpBar, p.mp, p.maxMp,
-      PANEL_X + 52, PANEL_Y + 58, PANEL_W - 60, 10, 0x4488FF);
-    this._mpText.setText(`${p.mp}/${p.maxMp}`);
+    this._hpBar.update(p.hp, p.maxHp);
+    this._mpBar.update(p.mp, p.maxMp);
 
     // EXP: calcular porcentaje hacia el siguiente nivel
     const levelData = getLevelData(p.level);
-    const expMax    = levelData?.expToNext ?? 1;
-    const expPct    = expMax > 0 ? p.exp / expMax : 1;
-    this._updateBar(this._expBar, p.exp, expMax,
-      PANEL_X + 52, PANEL_Y + 86, PANEL_W - 60, 8, 0xFFDD44);
-    this._expText.setText(p.level >= 20 ? 'MAX' : `${p.exp}/${expMax}`);
+    const expMax = levelData?.expToNext ?? 1;
+    this._expBar.update(p.exp, expMax);
 
     // Nivel
     this._levelText.setText(`LV ${p.level}`);
 
     // Minimapa
-    this._updateMinimap(p);
+    this._minimap.update(p);
   }
 
   /**
@@ -321,80 +294,16 @@ export class HUDScene extends Phaser.Scene {
    * @param {number} height   — alto de la barra
    * @param {number} color    — color de relleno (hex)
    */
-  _updateBar(graphics, current, max, x, y, width, height, color) {
-    graphics.clear();
-    if (max <= 0) return;
-
-    const pct     = Phaser.Math.Clamp(current / max, 0, 1);
-    const fillW   = Math.floor(width * pct);
-
-    if (fillW <= 0) return;
-
-    // Color se oscurece cuando el valor es bajo (efecto peligro)
-    const finalColor = (pct < 0.25 && color === 0xFF4444)
-      ? 0xFF0000
-      : color;
-
-    graphics.fillStyle(finalColor);
-    graphics.fillRect(x, y, fillW, height);
-
-    // Brillo superior (highlight)
-    graphics.fillStyle(0xFFFFFF, 0.15);
-    graphics.fillRect(x, y, fillW, Math.floor(height / 3));
-  }
 
   /**
    * Redibuja el minimapa con la posición del jugador y los enemigos.
    * Usa una escala proporcional al tamaño del mapa de tiles.
    * @param {Player} player
    */
-  _updateMinimap(player) {
-    const g    = this._minimapGraphics;
-    const size = HUD.MINIMAP_SIZE;
 
-    // Tamaño del mapa en píxeles (40 cols × 32px, 30 rows × 32px)
-    const MAP_PX_W = 40 * 32;
-    const MAP_PX_H = 30 * 32;
-
-    // Factor de escala: mapa real → minimapa
-    const scaleX = size / MAP_PX_W;
-    const scaleY = size / MAP_PX_H;
-
-    g.clear();
-
-    // ── Fondo del área de juego en el minimapa ─────────────────────────────
-    g.fillStyle(0x112211, 1);
-    g.fillRect(MINI_X + 1, MINI_Y + 1, size - 2, size - 2);
-
-    // ── Jugador: punto verde ───────────────────────────────────────────────
-    const px = MINI_X + player.x * scaleX;
-    const py = MINI_Y + player.y * scaleY;
-    g.fillStyle(0x00FF44);
-    g.fillCircle(px, py, 3);
-
-    // ── Enemigos activos: puntos rojos ─────────────────────────────────────
-    // Leemos la referencia a GameScene para obtener el grupo de enemigos
-    const gameScene = this.scene.get(SCENES.GAME);
-    if (gameScene?._enemyGroup) {
-      gameScene._enemyGroup.getChildren().forEach(enemy => {
-        if (!enemy.getData('defeated') && enemy.active) {
-          const ex = MINI_X + enemy.x * scaleX;
-          const ey = MINI_Y + enemy.y * scaleY;
-          const isBoss = enemy.getData('enemyId') === 'chaos_dragon';
-          g.fillStyle(isBoss ? 0xFF6600 : 0xFF2222);
-          g.fillCircle(ex, ey, isBoss ? 3 : 2);
-        }
-      });
-    }
-
-    // ── Zona de guardado: punto dorado ────────────────────────────────────
-    if (gameScene?._saveZones) {
-      gameScene._saveZones.getChildren().forEach(zone => {
-        const sx = MINI_X + zone.x * scaleX;
-        const sy = MINI_Y + zone.y * scaleY;
-        g.fillStyle(0xFFD700);
-        g.fillRect(sx - 2, sy - 2, 4, 4);
-      });
-    }
+  shutdown() {
+    this.input.keyboard.off('keydown-M', () => this._toggleMute());
+    this._minimap.destroy();
   }
+
 }

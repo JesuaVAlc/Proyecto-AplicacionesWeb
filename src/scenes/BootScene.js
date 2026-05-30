@@ -16,6 +16,7 @@
 
 import Phaser from 'phaser';
 import { SCENES, STORAGE_KEYS, AUDIO } from '../utils/Constants.js';
+import { StorageManager } from '../managers/StorageManager.js';
 
 export class BootScene extends Phaser.Scene {
 
@@ -45,7 +46,7 @@ export class BootScene extends Phaser.Scene {
     console.log('[BootScene] Configuración cargada, iniciando PreloadScene...');
 
     // Configurar que el juego NO pierda el foco al hacer clic fuera
-    this.game.events.on('hidden',  () => this._onGameHidden());
+    this.game.events.on('hidden', () => this._onGameHidden());
     this.game.events.on('visible', () => this._onGameVisible());
 
     // Ir a PreloadScene de inmediato
@@ -60,60 +61,13 @@ export class BootScene extends Phaser.Scene {
    * El registry actúa como un "store" global dentro de Phaser.
    */
   _loadSavedSettings() {
-    // ── Configuración de audio ──────────────────────────────────────────────
-    let audioConfig;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.AUDIO_CONFIG);
-      audioConfig = saved ? JSON.parse(saved) : null;
-    } catch {
-      audioConfig = null;
-    }
+    const storage = new StorageManager();
+    this.registry.set('storage', storage);
 
-    // Si no hay config guardada, usar valores por defecto de Constants
-    const finalAudio = {
-      musicVolume: audioConfig?.musicVolume  ?? AUDIO.MUSIC_VOLUME,
-      sfxVolume:   audioConfig?.sfxVolume    ?? AUDIO.SFX_VOLUME,
-      muted:       audioConfig?.muted        ?? AUDIO.DEFAULT_MUTED,
-    };
-
-    // Guardar en el registry global para que AudioManager lo lea
-    this.registry.set('audioConfig', finalAudio);
-
-    // ── Configuración de accesibilidad ──────────────────────────────────────
-    let settings;
-    try {
-      const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      settings = saved ? JSON.parse(saved) : null;
-    } catch {
-      settings = null;
-    }
-
-    const finalSettings = {
-      highContrast: settings?.highContrast ?? false,   // Modo alto contraste
-      fontSize:     settings?.fontSize     ?? 'normal', // 'small' | 'normal' | 'large'
-    };
-
-    this.registry.set('settings', finalSettings);
-
-    // ── Highscore ───────────────────────────────────────────────────────────
-    let highscore = 0;
-    try {
-      highscore = parseInt(localStorage.getItem(STORAGE_KEYS.HIGHSCORE)) || 0;
-    } catch {
-      highscore = 0;
-    }
-    this.registry.set('highscore', highscore);
-
-    // ── Nivel máximo alcanzado ──────────────────────────────────────────────
-    let maxLevel = 1;
-    try {
-      maxLevel = parseInt(localStorage.getItem(STORAGE_KEYS.MAX_LEVEL)) || 1;
-    } catch {
-      maxLevel = 1;
-    }
-    this.registry.set('maxLevelReached', maxLevel);
-
-    console.log('[BootScene] Settings cargados:', { finalAudio, finalSettings, highscore, maxLevel });
+    this.registry.set('audioConfig', storage.loadAudioConfig());
+    this.registry.set('settings', storage.loadSettings());
+    this.registry.set('highscore', storage.getHighscore());
+    this.registry.set('maxLevelReached', storage.getMaxLevel());
   }
 
   /**

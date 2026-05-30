@@ -21,10 +21,10 @@ import {
 
 // Opciones del menú con su escena/acción destino
 const MENU_OPTIONS = [
-  { label: 'Nueva Partida', action: 'new_game'   },
-  { label: 'Continuar',     action: 'continue'   },
-  { label: 'Tutorial',      action: 'tutorial'   },
-  { label: 'Configuración', action: 'settings'   },
+  { label: 'Nueva Partida', action: 'new_game' },
+  { label: 'Continuar', action: 'continue' },
+  { label: 'Tutorial', action: 'tutorial' },
+  { label: 'Configuración', action: 'settings' },
 ];
 
 export class MenuScene extends Phaser.Scene {
@@ -42,17 +42,13 @@ export class MenuScene extends Phaser.Scene {
   // ─── init ────────────────────────────────────────────────────────────────────
   init() {
     // Verificar si existe una partida guardada en localStorage
-    try {
-      const save = localStorage.getItem(STORAGE_KEYS.SAVE_SLOT);
-      this._hasSave = save !== null;
-    } catch {
-      this._hasSave = false;
-    }
+    const storage = this.registry.get('storage');
+    this._hasSave = storage.hasSave();
   }
 
   // ─── create ──────────────────────────────────────────────────────────────────
   create() {
-    const cx = GAME_WIDTH  / 2;
+    const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2;
 
     this._createBackground(cx, cy);
@@ -92,15 +88,15 @@ export class MenuScene extends Phaser.Scene {
 
     // Esquinas decorativas
     this._drawCornerDecoration(border, 20, 20);
-    this._drawCornerDecoration(border, GAME_WIDTH - 20, 20,       true, false);
-    this._drawCornerDecoration(border, 20,              GAME_HEIGHT - 20, false, true);
+    this._drawCornerDecoration(border, GAME_WIDTH - 20, 20, true, false);
+    this._drawCornerDecoration(border, 20, GAME_HEIGHT - 20, false, true);
     this._drawCornerDecoration(border, GAME_WIDTH - 20, GAME_HEIGHT - 20, true, true);
 
     // Estrellas de fondo (puntos blancos aleatorios)
     const stars = this.add.graphics();
     stars.fillStyle(0xFFFFFF, 0.6);
     for (let i = 0; i < 80; i++) {
-      const sx = Phaser.Math.Between(20, GAME_WIDTH  - 20);
+      const sx = Phaser.Math.Between(20, GAME_WIDTH - 20);
       const sy = Phaser.Math.Between(20, GAME_HEIGHT - 20);
       const sr = Math.random() < 0.2 ? 1.5 : 0.8;
       stars.fillCircle(sx, sy, sr);
@@ -126,25 +122,25 @@ export class MenuScene extends Phaser.Scene {
     // Sombra del título
     this.add.text(cx + 3, 78, 'FINAL FANTASY 2D', {
       fontFamily: 'monospace',
-      fontSize:   '36px',
-      color:      '#2a1a00',
+      fontSize: '36px',
+      color: '#2a1a00',
     }).setOrigin(0.5);
 
     // Título principal
     const title = this.add.text(cx, 75, 'FINAL FANTASY 2D', {
       fontFamily: 'monospace',
-      fontSize:   '36px',
-      color:      '#FFD700',
-      stroke:     '#8B6914',
+      fontSize: '36px',
+      color: '#FFD700',
+      stroke: '#8B6914',
       strokeThickness: 3,
     }).setOrigin(0.5);
 
     // Subtítulo
     this.add.text(cx, 115, '~ Legend of the Crystal ~', {
       fontFamily: 'monospace',
-      fontSize:   '13px',
-      color:      '#88AAFF',
-      stroke:     '#000033',
+      fontSize: '13px',
+      color: '#88AAFF',
+      stroke: '#000033',
       strokeThickness: 2,
     }).setOrigin(0.5);
 
@@ -155,12 +151,12 @@ export class MenuScene extends Phaser.Scene {
 
     // Efecto parpadeo suave en el título (tweens de alpha)
     this.tweens.add({
-      targets:    title,
-      alpha:      { from: 1, to: 0.7 },
-      duration:   2000,
-      yoyo:       true,
-      repeat:     -1,
-      ease:       'Sine.easeInOut',
+      targets: title,
+      alpha: { from: 1, to: 0.7 },
+      duration: 2000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
     });
   }
 
@@ -172,22 +168,22 @@ export class MenuScene extends Phaser.Scene {
     this._optionTexts = [];
 
     // Posición Y del primer item — centrado verticalmente con offset
-    const startY  = cy - 30;
+    const startY = cy - 30;
     const spacing = 44;
 
     MENU_OPTIONS.forEach((option, index) => {
-      const y        = startY + index * spacing;
+      const y = startY + index * spacing;
       const isContinue = option.action === 'continue';
-      const disabled   = isContinue && !this._hasSave;
+      const disabled = isContinue && !this._hasSave;
 
       // Color según estado
       const color = disabled ? '#444466' : '#FFFFFF';
 
       const text = this.add.text(cx + 24, y, option.label, {
         fontFamily: 'monospace',
-        fontSize:   '20px',
+        fontSize: '20px',
         color,
-        stroke:     '#000022',
+        stroke: '#000022',
         strokeThickness: 2,
       }).setOrigin(0.5);
 
@@ -202,8 +198,8 @@ export class MenuScene extends Phaser.Scene {
    * Pie de pantalla con highscore y nivel máximo leídos del registry.
    */
   _createFooter(cx) {
-    const highscore = this.registry.get('highscore')       || 0;
-    const maxLevel  = this.registry.get('maxLevelReached') || 1;
+    const highscore = this.registry.get('highscore') || 0;
+    const maxLevel = this.registry.get('maxLevelReached') || 1;
 
     // Línea separadora
     const line = this.add.graphics();
@@ -213,34 +209,34 @@ export class MenuScene extends Phaser.Scene {
     // Highscore
     this.add.text(cx - 120, GAME_HEIGHT - 42, `HIGH SCORE`, {
       fontFamily: 'monospace',
-      fontSize:   '10px',
-      color:      '#888888',
+      fontSize: '10px',
+      color: '#888888',
     }).setOrigin(0.5);
 
     this.add.text(cx - 120, GAME_HEIGHT - 28, `${highscore}`, {
       fontFamily: 'monospace',
-      fontSize:   '14px',
-      color:      '#FFD700',
+      fontSize: '14px',
+      color: '#FFD700',
     }).setOrigin(0.5);
 
     // Nivel máximo
     this.add.text(cx + 120, GAME_HEIGHT - 42, `NIVEL MÁX`, {
       fontFamily: 'monospace',
-      fontSize:   '10px',
-      color:      '#888888',
+      fontSize: '10px',
+      color: '#888888',
     }).setOrigin(0.5);
 
     this.add.text(cx + 120, GAME_HEIGHT - 28, `LV ${maxLevel}`, {
       fontFamily: 'monospace',
-      fontSize:   '14px',
-      color:      '#88AAFF',
+      fontSize: '14px',
+      color: '#88AAFF',
     }).setOrigin(0.5);
 
     // Instrucciones de navegación
     this.add.text(cx, GAME_HEIGHT - 16, 'W/S · Navegar    SPACE/ENTER · Confirmar', {
       fontFamily: 'monospace',
-      fontSize:   '10px',
-      color:      '#555577',
+      fontSize: '10px',
+      color: '#555577',
     }).setOrigin(0.5);
   }
 
@@ -257,17 +253,17 @@ export class MenuScene extends Phaser.Scene {
     this._cursor.fillTriangle(
       cx - 110, 0,   // punta
       cx - 124, -7,  // base superior
-      cx - 124,  7   // base inferior
+      cx - 124, 7   // base inferior
     );
 
     // Animación de latido horizontal del cursor
     this.tweens.add({
-      targets:  this._cursor,
-      x:        { from: 0, to: 6 },
+      targets: this._cursor,
+      x: { from: 0, to: 6 },
       duration: 600,
-      yoyo:     true,
-      repeat:   -1,
-      ease:     'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
     });
   }
 
@@ -280,9 +276,9 @@ export class MenuScene extends Phaser.Scene {
    */
   _setupInput() {
     // Teclas de movimiento vertical
-    this._keyUp   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this._keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this._keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this._keyArrowUp   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+    this._keyArrowUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
     this._keyArrowDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 
     // Teclas de confirmación
@@ -290,12 +286,12 @@ export class MenuScene extends Phaser.Scene {
     this._keyEnter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
     // Usar justDown para evitar repetición de tecla mantenida
-    this.input.keyboard.on('keydown-W',      this._moveUp,      this);
-    this.input.keyboard.on('keydown-S',      this._moveDown,    this);
-    this.input.keyboard.on('keydown-UP',     this._moveUp,      this);
-    this.input.keyboard.on('keydown-DOWN',   this._moveDown,    this);
-    this.input.keyboard.on('keydown-SPACE',  this._confirmSelection, this);
-    this.input.keyboard.on('keydown-ENTER',  this._confirmSelection, this);
+    this.input.keyboard.on('keydown-W', this._moveUp, this);
+    this.input.keyboard.on('keydown-S', this._moveDown, this);
+    this.input.keyboard.on('keydown-UP', this._moveUp, this);
+    this.input.keyboard.on('keydown-DOWN', this._moveDown, this);
+    this.input.keyboard.on('keydown-SPACE', this._confirmSelection, this);
+    this.input.keyboard.on('keydown-ENTER', this._confirmSelection, this);
   }
 
   // ─── Navegación ───────────────────────────────────────────────────────────────
@@ -335,8 +331,8 @@ export class MenuScene extends Phaser.Scene {
    * La opción activa se pinta dorada; las demás en blanco o gris.
    */
   _updateCursor() {
-    const cy      = GAME_HEIGHT / 2;
-    const startY  = cy - 30;
+    const cy = GAME_HEIGHT / 2;
+    const startY = cy - 30;
     const spacing = 44;
 
     this._optionTexts.forEach((text, index) => {
@@ -362,7 +358,7 @@ export class MenuScene extends Phaser.Scene {
    * Hace fade out antes de cambiar de escena para una transición suave.
    */
   _confirmSelection() {
-    const option   = MENU_OPTIONS[this._selectedIndex];
+    const option = MENU_OPTIONS[this._selectedIndex];
     const disabled = this._optionTexts[this._selectedIndex].getData('disabled');
 
     if (disabled) return;
@@ -381,7 +377,7 @@ export class MenuScene extends Phaser.Scene {
     switch (action) {
       case 'new_game':
         // Limpiar partida guardada y comenzar desde cero
-        try { localStorage.removeItem(STORAGE_KEYS.SAVE_SLOT); } catch {}
+        try { this.registry.get('storage').deleteSave();} catch { }
         this.scene.start(SCENES.GAME);
         break;
 
@@ -407,10 +403,10 @@ export class MenuScene extends Phaser.Scene {
    * Removemos los listeners de teclado para evitar memory leaks.
    */
   shutdown() {
-    this.input.keyboard.off('keydown-W',     this._moveUp,           this);
-    this.input.keyboard.off('keydown-S',     this._moveDown,         this);
-    this.input.keyboard.off('keydown-UP',    this._moveUp,           this);
-    this.input.keyboard.off('keydown-DOWN',  this._moveDown,         this);
+    this.input.keyboard.off('keydown-W', this._moveUp, this);
+    this.input.keyboard.off('keydown-S', this._moveDown, this);
+    this.input.keyboard.off('keydown-UP', this._moveUp, this);
+    this.input.keyboard.off('keydown-DOWN', this._moveDown, this);
     this.input.keyboard.off('keydown-SPACE', this._confirmSelection, this);
     this.input.keyboard.off('keydown-ENTER', this._confirmSelection, this);
   }

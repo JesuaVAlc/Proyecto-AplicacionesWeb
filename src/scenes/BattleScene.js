@@ -26,6 +26,9 @@ import { Player } from '../objects/Player.js';
 import { BattleManager } from '../managers/BattleManager.js';
 import { getEnemyById } from '../data/enemies.js';
 import { getItemById, ITEMS } from '../data/items.js';
+import { HealthBar } from '../ui/HealthBar.js';
+import { BattleMenu } from '../ui/BattleMenu.js';
+import { DialogBox } from '../ui/DialogoBox.js';
 
 // Layout de la pantalla de batalla
 const LAYOUT = {
@@ -70,9 +73,21 @@ export class BattleScene extends Phaser.Scene {
     this._createBackground();
     this._createEnemyDisplay();
     this._createPlayerDisplay();
-    this._createBattleLog();
-    this._createActionMenu();
-
+    this._menu = new BattleMenu(
+      this,
+      LAYOUT.menuX,
+      LAYOUT.menuY,
+      this._player
+    );
+    this._menu.refresh();
+    this._battleLog = new DialogBox(
+      this,
+      LAYOUT.logX,
+      LAYOUT.logY,
+      LAYOUT.logW,
+      LAYOUT.logH,
+      { mode: 'log', maxLines: 3, depth: 5 }
+    );
     // ── Determinar quién va primero ───────────────────────────────────────
     this._currentTurn = this._manager.getFirstTurn();
     this._state = BATTLE_STATES.PLAYER_TURN;
@@ -95,7 +110,7 @@ export class BattleScene extends Phaser.Scene {
     if (this._currentTurn === 'enemy') {
       this.time.delayedCall(1200, () => this._doEnemyTurn());
     } else {
-      this._refreshMenu();
+      this._menu.refresh();
     }
 
     console.log('[BattleScene] Batalla iniciada contra:', this._enemy.name);
@@ -244,18 +259,11 @@ export class BattleScene extends Phaser.Scene {
       .lineStyle(1, 0xFF4444, 0.6)
       .strokeRect(panelX - 4, panelY - 4, panelW + 8, 22);
 
-    // Fondo barra HP enemigo
-    this._enemyHpBg = this.add.graphics();
-    this._enemyHpBg.fillStyle(0x330000);
-    this._enemyHpBg.fillRect(panelX, panelY, panelW, 14);
-
-    // Relleno barra HP enemigo
-    this._enemyHpBar = this.add.graphics();
-
-    // Texto HP enemigo
-    this._enemyHpText = this.add.text(ex, panelY, '', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#FFFFFF',
-    }).setOrigin(0.5, 0);
+    // Barra del enemigo
+    this._enemyHpBar = new HealthBar(
+      this, panelX, panelY, panelW, 14, 0xFF4444,
+      { textPos: 'inside', prefix: 'HP: ', bgColor: 0x330000 }
+    );
 
     this._updateEnemyBars();
   }
@@ -288,28 +296,22 @@ export class BattleScene extends Phaser.Scene {
       .strokeRoundedRect(panelX - 4, panelY - 4, panelW + 8, 56, 6);
 
     // Barra HP jugador
-    this.add.text(panelX, panelY, 'HP', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#FF6666',
-    });
-    this._playerHpBg = this.add.graphics();
-    this._playerHpBg.fillStyle(0x330000);
-    this._playerHpBg.fillRect(panelX + 18, panelY, panelW - 18, 10);
-    this._playerHpBar = this.add.graphics();
-    this._playerHpText = this.add.text(panelX + panelW / 2, panelY, '', {
-      fontFamily: 'monospace', fontSize: '8px', color: '#FFFFFF',
-    }).setOrigin(0.5, 0);
+    this._playerHpBar = new HealthBar(
+      this, panelX + 18, panelY, panelW - 18, 10, 0xFF4444,
+      {
+        label: 'HP', labelColor: '#FF6666', textPos: 'inside',
+        bgColor: 0x330000
+      }
+    );
 
     // Barra MP jugador
-    this.add.text(panelX, panelY + 18, 'MP', {
-      fontFamily: 'monospace', fontSize: '9px', color: '#6688FF',
-    });
-    this._playerMpBg = this.add.graphics();
-    this._playerMpBg.fillStyle(0x000033);
-    this._playerMpBg.fillRect(panelX + 18, panelY + 18, panelW - 18, 10);
-    this._playerMpBar = this.add.graphics();
-    this._playerMpText = this.add.text(panelX + panelW / 2, panelY + 18, '', {
-      fontFamily: 'monospace', fontSize: '8px', color: '#FFFFFF',
-    }).setOrigin(0.5, 0);
+    this._playerMpBar = new HealthBar(
+      this, panelX + 18, panelY + 18, panelW - 18, 10, 0x4488FF,
+      {
+        label: 'MP', labelColor: '#6688FF', textPos: 'inside',
+        bgColor: 0x000033
+      }
+    );
 
     // Nivel del jugador
     this._playerLvText = this.add.text(panelX, panelY + 34, '', {
@@ -317,80 +319,6 @@ export class BattleScene extends Phaser.Scene {
     });
 
     this._updatePlayerBars();
-  }
-
-  /**
-   * Log de mensajes de batalla: caja de texto en la parte inferior.
-   */
-  _createBattleLog() {
-    const { logX, logY, logW, logH } = LAYOUT;
-
-    // Fondo del log
-    this.add.graphics()
-      .fillStyle(0x000022, 0.85)
-      .fillRoundedRect(logX, logY, logW, logH, 6)
-      .lineStyle(1, 0x334488, 0.8)
-      .strokeRoundedRect(logX, logY, logW, logH, 6);
-
-    // Texto del log (3 líneas visibles)
-    this._logLines = ['', '', ''];
-    this._logTexts = [];
-
-    for (let i = 0; i < 3; i++) {
-      this._logTexts.push(
-        this.add.text(logX + 10, logY + 6 + i * 16, '', {
-          fontFamily: 'monospace',
-          fontSize: '11px',
-          color: i === 0 ? '#FFFFFF' : '#AAAACC',
-        })
-      );
-    }
-  }
-
-  /**
-   * Menú de acciones: lista de opciones navegables.
-   * En el turno del jugador muestra: Habilidades, Objetos, Huir.
-   * Al elegir Habilidades abre el submenú de skills.
-   * Al elegir Objetos abre el submenú de items.
-   */
-  _createActionMenu() {
-    const { menuX, menuY } = LAYOUT;
-
-    // Fondo del menú
-    this._menuBg = this.add.graphics();
-    this._menuBg.fillStyle(0x000033, 0.9);
-    this._menuBg.fillRoundedRect(menuX - 8, menuY - 8, 220, 110, 6);
-    this._menuBg.lineStyle(2, 0xFFD700, 0.8);
-    this._menuBg.strokeRoundedRect(menuX - 8, menuY - 8, 220, 110, 6);
-
-    // Opciones del menú principal
-    this._mainMenuOptions = ['⚔ Habilidades', '🎒 Objetos', '🏃 Huir'];
-    this._menuTexts = [];
-
-    this._mainMenuOptions.forEach((opt, i) => {
-      this._menuTexts.push(
-        this.add.text(menuX + 16, menuY + 6 + i * 28, opt, {
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          color: '#CCCCCC',
-        })
-      );
-    });
-
-    // Cursor del menú
-    this._menuCursor = this.add.text(menuX, menuY + 6, '▶', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#FFD700',
-    });
-
-    // Textos del submenú (hasta 4 skills o items)
-    this._subMenuTexts = [];
-    for (let i = 0; i < 4; i++) {
-      this._subMenuTexts.push(
-        this.add.text(menuX + 16, menuY + 6 + i * 24, '', {
-          fontFamily: 'monospace', fontSize: '12px', color: '#CCCCCC',
-        }).setVisible(false)
-      );
-    }
   }
 
   // ─── Input ────────────────────────────────────────────────────────────────────
@@ -407,143 +335,50 @@ export class BattleScene extends Phaser.Scene {
 
   _onUp() {
     if (this._state !== BATTLE_STATES.PLAYER_TURN) return;
-    const opts = this._subMenu ? this._getSubMenuOptions() : this._mainMenuOptions;
-    this._menuIndex = (this._menuIndex - 1 + opts.length) % opts.length;
-    this._refreshMenu();
+    this._menu.moveUp();
   }
 
   _onDown() {
     if (this._state !== BATTLE_STATES.PLAYER_TURN) return;
-    const opts = this._subMenu ? this._getSubMenuOptions() : this._mainMenuOptions;
-    this._menuIndex = (this._menuIndex + 1) % opts.length;
-    this._refreshMenu();
+    this._menu.moveDown();
   }
 
   _onConfirm() {
     if (this._state !== BATTLE_STATES.PLAYER_TURN) return;
 
-    if (!this._subMenu) {
-      // Menú principal
-      switch (this._menuIndex) {
-        case 0: this._openSkillMenu(); break;
-        case 1: this._openItemMenu(); break;
+    if (!this._menu.isInSubMenu()) {
+      switch (this._menu.getMainIndex()) {
+        case 0: this._menu.openSkills(); break;
+        case 1: this._menu.openItems(); break;
         case 2: this._tryFlee(); break;
       }
-    } else if (this._subMenu === 'skills') {
-      this._selectSkill();
-    } else if (this._subMenu === 'items') {
-      this._selectItem();
+    } else {
+      const skill = this._menu.getSelectedSkill();
+      const itemId = this._menu.getSelectedItem();
+      if (skill) this._selectSkill(skill);
+      if (itemId) this._selectItem(itemId);
     }
   }
 
   _onBack() {
-    if (this._state !== BATTLE_STATES.PLAYER_TURN) return;
-    if (this._subMenu) {
-      this._closeSubMenu();
-    }
-  }
+    if (this._state !== BATTLE_STATES.PLAYER_TURN)
+      return;
 
-  // ─── Navegación del menú ──────────────────────────────────────────────────────
-
-  /**
-   * Abre el submenú de habilidades.
-   */
-  _openSkillMenu() {
-    this._subMenu = 'skills';
-    this._menuIndex = 0;
-    this._refreshMenu();
-  }
-
-  /**
-   * Abre el submenú de objetos.
-   */
-  _openItemMenu() {
-    this._subMenu = 'items';
-    this._menuIndex = 0;
-    this._refreshMenu();
-  }
-
-  /**
-   * Cierra el submenú y vuelve al menú principal.
-   */
-  _closeSubMenu() {
-    this._subMenu = null;
-    this._menuIndex = 0;
-    this._refreshMenu();
+    if (this._menu.isInSubMenu())
+      this._menu.closeSubMenu();
   }
 
   /**
    * Retorna las opciones del submenú activo.
    * @returns {Array<string>}
    */
-  _getSubMenuOptions() {
-    if (this._subMenu === 'skills') {
-      return this._player.skills.map(s =>
-        `${s.name} ${s.mpCost > 0 ? `(${s.mpCost}MP)` : ''}`
-      );
-    }
-    if (this._subMenu === 'items') {
-      const items = Object.keys(this._player.inventory);
-      if (items.length === 0) return ['Sin objetos'];
-      return items.map(id => {
-        const item = getItemById(id);
-        return item ? `${item.name} ×${this._player.inventory[id]}` : id;
-      });
-    }
-    return [];
-  }
-
-  /**
-   * Redibuja el menú con el cursor en la posición correcta.
-   */
-  _refreshMenu() {
-    const isSubMenu = !!this._subMenu;
-    const opts = isSubMenu ? this._getSubMenuOptions() : this._mainMenuOptions;
-
-    // Ocultar menú principal si estamos en submenú
-    this._menuTexts.forEach(t => t.setVisible(!isSubMenu));
-
-    // Actualizar submenú
-    this._subMenuTexts.forEach((t, i) => {
-      if (isSubMenu && i < opts.length) {
-        t.setText(opts[i]);
-        const isSelected = i === this._menuIndex;
-
-        // Colorear según disponibilidad (MP insuficiente = gris)
-        let color = isSelected ? '#FFD700' : '#CCCCCC';
-        if (this._subMenu === 'skills') {
-          const skill = this._player.skills[i];
-          if (skill && skill.mpCost > this._player.mp) color = '#555577';
-        }
-        t.setColor(color).setVisible(true);
-      } else {
-        t.setVisible(false);
-      }
-    });
-
-    // Mover cursor
-    const { menuX, menuY } = LAYOUT;
-    const spacing = isSubMenu ? 24 : 28;
-    this._menuCursor.setY(menuY + 6 + this._menuIndex * spacing);
-    this._menuCursor.setVisible(true);
-  }
-
-  // ─── Ejecución de acciones ────────────────────────────────────────────────────
-
-  /**
-   * Ejecuta la habilidad seleccionada del jugador.
-   */
-  _selectSkill() {
-    const skill = this._player.skills[this._menuIndex];
-    if (!skill) return;
-
-    // Verificar MP
+  // ─── Ejecución de Habilidades ────────────────────────────────────────────────────
+  _selectSkill(skill) {
     if (skill.mpCost > this._player.mp) {
       this._log('¡MP insuficiente!');
       return;
     }
-
-    this._closeSubMenu();
+    this._menu.closeSubMenu();
     this._state = BATTLE_STATES.ANIMATING;
 
     // Animación de ataque del jugador
@@ -564,17 +399,11 @@ export class BattleScene extends Phaser.Scene {
   /**
    * Usa el objeto seleccionado del inventario.
    */
-  _selectItem() {
-    const itemKeys = Object.keys(this._player.inventory);
-    if (itemKeys.length === 0) return;
-
-    const itemId = itemKeys[this._menuIndex];
-    if (!itemId) return;
-
+  _selectItem(itemId) {
     const item = getItemById(itemId);
     if (!item) return;
 
-    this._closeSubMenu();
+    this._menu.closeSubMenu();
     this._state = BATTLE_STATES.ANIMATING;
 
     const result = this._manager.playerUseItem(item);
@@ -620,7 +449,7 @@ export class BattleScene extends Phaser.Scene {
         // Volver al turno del jugador
         this._state = BATTLE_STATES.PLAYER_TURN;
         this._menuIndex = 0;
-        this._refreshMenu();
+        this._menu.refresh();
         this._log('Tu turno. Elige una acción.');
       });
     });
@@ -676,45 +505,16 @@ export class BattleScene extends Phaser.Scene {
    * Redibuja las barras de HP y MP del jugador.
    */
   _updatePlayerBars() {
-    const p = this._player;
-    const barW = 162;
-
-    // Calcular panelX igual que en _createPlayerDisplay
-    const panelX = LAYOUT.playerX - 90 + 18;
-    const panelY = LAYOUT.playerY + 58;
-
-    // HP
-    this._playerHpBar.clear();
-    const hpPct = Phaser.Math.Clamp(p.hp / p.maxHp, 0, 1);
-    this._playerHpBar.fillStyle(hpPct < 0.25 ? 0xFF0000 : 0xFF4444);
-    this._playerHpBar.fillRect(panelX, panelY, Math.floor(barW * hpPct), 10);
-    this._playerHpText.setText(`${p.hp}/${p.maxHp}`);
-
-    // MP
-    this._playerMpBar.clear();
-    const mpPct = Phaser.Math.Clamp(p.mp / p.maxMp, 0, 1);
-    this._playerMpBar.fillStyle(0x4488FF);
-    this._playerMpBar.fillRect(panelX, panelY + 18, Math.floor(barW * mpPct), 10);
-    this._playerMpText.setText(`${p.mp}/${p.maxMp}`);
-
-    // Nivel
-    this._playerLvText.setText(`LV ${p.level}  EXP: ${p.exp}`);
+    this._playerHpBar.update(this._player.hp, this._player.maxHp);
+    this._playerMpBar.update(this._player.mp, this._player.maxMp);
+    this._playerLvText.setText(`LV ${this._player.level}  EXP: ${this._player.exp}`);
   }
 
   /**
    * Redibuja la barra de HP del enemigo.
    */
   _updateEnemyBars() {
-    const e = this._enemy;
-    const panelW = 160;
-    const panelX = LAYOUT.enemyX - panelW / 2;
-    const panelY = LAYOUT.enemyY - 70;
-
-    this._enemyHpBar.clear();
-    const hpPct = Phaser.Math.Clamp(e.stats.hp / e.stats.maxHp, 0, 1);
-    this._enemyHpBar.fillStyle(hpPct < 0.25 ? 0xFF0000 : 0xFF4444);
-    this._enemyHpBar.fillRect(panelX, panelY, Math.floor(panelW * hpPct), 14);
-    this._enemyHpText.setText(`HP: ${e.stats.hp}/${e.stats.maxHp}`);
+    this._enemyHpBar.update(this._enemy.stats.hp, this._enemy.stats.maxHp);
   }
 
   // ─── Log de mensajes ──────────────────────────────────────────────────────────
@@ -726,11 +526,7 @@ export class BattleScene extends Phaser.Scene {
    */
   _log(message) {
     // Desplazar líneas: la más nueva va arriba
-    this._logLines = [message, ...this._logLines.slice(0, 2)];
-    this._logTexts.forEach((text, i) => {
-      text.setText(this._logLines[i] ?? '');
-      text.setColor(i === 0 ? '#FFFFFF' : '#8888AA');
-    });
+    this._battleLog.addLine(message);
   }
 
   // ─── Fin de batalla ───────────────────────────────────────────────────────────
@@ -764,8 +560,7 @@ export class BattleScene extends Phaser.Scene {
     this._log(winMsg);
 
     // Ocultar menú
-    this._menuCursor.setVisible(false);
-    this._menuTexts.forEach(t => t.setVisible(false));
+    this._menu.setVisible(false);
 
     // Guardar datos actualizados del jugador en registry
     this.registry.set('battlePlayerData', {
@@ -799,14 +594,13 @@ export class BattleScene extends Phaser.Scene {
       this.time.delayedCall(1000, () => {
         this._state = BATTLE_STATES.PLAYER_TURN;
         this._menuIndex = 0;
-        this._refreshMenu();
+        this._menu.refresh()
       });
       return;
     }
 
     this._log('¡Has sido derrotado!');
-    this._menuCursor.setVisible(false);
-    this._menuTexts.forEach(t => t.setVisible(false));
+    this._menu.setVisible(false);
 
     this.cameras.main.shake(500, 0.02);
     this.time.delayedCall(2000, () => this._endBattle('lose'));
@@ -836,5 +630,10 @@ export class BattleScene extends Phaser.Scene {
     this.input.keyboard.off('keydown-SPACE', this._onConfirm, this);
     this.input.keyboard.off('keydown-ENTER', this._onConfirm, this);
     this.input.keyboard.off('keydown-ESC', this._onBack, this);
+    this._playerHpBar.destroy();
+    this._playerMpBar.destroy();
+    this._enemyHpBar.destroy();
+    this._menu.destroy();
+    this._battleLog.destroy();
   }
 }

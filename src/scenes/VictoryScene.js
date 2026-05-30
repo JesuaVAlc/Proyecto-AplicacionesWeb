@@ -26,30 +26,18 @@ export class VictoryScene extends Phaser.Scene {
     this._level = data?.level ?? 1;
 
     // Leer y actualizar highscore
-    try {
-      const saved = parseInt(localStorage.getItem(STORAGE_KEYS.HIGHSCORE)) || 0;
-      this._isNewHighscore = this._score > saved;
-      if (this._isNewHighscore) {
-        localStorage.setItem(STORAGE_KEYS.HIGHSCORE, this._score.toString());
-      }
-      this._highscore = Math.max(this._score, saved);
-    } catch {
-      this._highscore      = this._score;
-      this._isNewHighscore = false;
-    }
-
-    // Actualizar nivel máximo
-    try {
-      const savedLevel = parseInt(localStorage.getItem(STORAGE_KEYS.MAX_LEVEL)) || 1;
-      if (this._level > savedLevel) {
-        localStorage.setItem(STORAGE_KEYS.MAX_LEVEL, this._level.toString());
-      }
-    } catch {}
+    const storage = this.registry.get('storage');
+    const saved = storage.getHighscore();
+    // Actualizar highscore si el actual es mayor
+    this._isNewHighscore = this._score > saved;
+    if (this._isNewHighscore) storage.updateHighscore(this._score);
+    this._highscore = Math.max(this._score, saved);
+    storage.updateMaxLevel(this._level);
   }
 
   // ─── create ──────────────────────────────────────────────────────────────────
   create() {
-    const cx = GAME_WIDTH  / 2;
+    const cx = GAME_WIDTH / 2;
     const cy = GAME_HEIGHT / 2;
 
     this._createBackground(cx, cy);
@@ -75,8 +63,8 @@ export class VictoryScene extends Phaser.Scene {
     // Destellos dorados de fondo
     const stars = this.add.graphics();
     for (let i = 0; i < 120; i++) {
-      const x    = Phaser.Math.Between(0, GAME_WIDTH);
-      const y    = Phaser.Math.Between(0, GAME_HEIGHT);
+      const x = Phaser.Math.Between(0, GAME_WIDTH);
+      const y = Phaser.Math.Between(0, GAME_HEIGHT);
       const size = Math.random() < 0.15 ? 2 : 1;
       const alpha = 0.3 + Math.random() * 0.7;
       stars.fillStyle(0xFFD700, alpha);
@@ -108,14 +96,14 @@ export class VictoryScene extends Phaser.Scene {
 
       // Animar cada partícula subiendo y desvaneciéndose
       this.tweens.add({
-        targets:  particle,
-        y:        Phaser.Math.Between(-20, cy),
-        x:        particle.x + Phaser.Math.Between(-60, 60),
-        alpha:    0,
+        targets: particle,
+        y: Phaser.Math.Between(-20, cy),
+        x: particle.x + Phaser.Math.Between(-60, 60),
+        alpha: 0,
         duration: Phaser.Math.Between(2000, 4000),
-        delay:    Phaser.Math.Between(0, 3000),
-        repeat:   -1,
-        ease:     'Power1',
+        delay: Phaser.Math.Between(0, 3000),
+        repeat: -1,
+        ease: 'Power1',
         onRepeat: () => {
           particle.setPosition(
             Phaser.Math.Between(50, GAME_WIDTH - 50),
@@ -134,36 +122,36 @@ export class VictoryScene extends Phaser.Scene {
     // Sombra
     this.add.text(cx + 3, cy - 100 + 3, '¡VICTORIA!', {
       fontFamily: 'monospace',
-      fontSize:   '48px',
-      color:      '#4a3000',
+      fontSize: '48px',
+      color: '#4a3000',
     }).setOrigin(0.5);
 
     // Texto principal con escala animada
     const victoryText = this.add.text(cx, cy - 100, '¡VICTORIA!', {
       fontFamily: 'monospace',
-      fontSize:   '48px',
-      color:      '#FFD700',
-      stroke:     '#8B6914',
+      fontSize: '48px',
+      color: '#FFD700',
+      stroke: '#8B6914',
       strokeThickness: 4,
     }).setOrigin(0.5).setScale(0);
 
     // Animación de aparición con rebote
     this.tweens.add({
-      targets:  victoryText,
-      scaleX:   1,
-      scaleY:   1,
+      targets: victoryText,
+      scaleX: 1,
+      scaleY: 1,
       duration: 800,
-      ease:     'Back.easeOut',
-      delay:    200,
+      ease: 'Back.easeOut',
+      delay: 200,
     });
 
     // Subtítulo
     this.time.delayedCall(900, () => {
       const sub = this.add.text(cx, cy - 48, '~ El Dragón del Caos ha sido derrotado ~', {
         fontFamily: 'monospace',
-        fontSize:   '13px',
-        color:      '#FFCC44',
-        stroke:     '#000000',
+        fontSize: '13px',
+        color: '#FFCC44',
+        stroke: '#000000',
         strokeThickness: 2,
       }).setOrigin(0.5).setAlpha(0);
 
@@ -222,11 +210,11 @@ export class VictoryScene extends Phaser.Scene {
       // Si es nuevo récord, animación de destello
       if (this._isNewHighscore) {
         this.tweens.add({
-          targets:  hsText,
-          alpha:    { from: 1, to: 0.5 },
+          targets: hsText,
+          alpha: { from: 1, to: 0.5 },
           duration: 600,
-          yoyo:     true,
-          repeat:   -1,
+          yoyo: true,
+          repeat: -1,
         });
       }
 
@@ -245,20 +233,20 @@ export class VictoryScene extends Phaser.Scene {
       // Texto parpadeante de instrucción
       const prompt = this.add.text(cx, cy + 120, 'Presiona SPACE o ENTER para continuar', {
         fontFamily: 'monospace',
-        fontSize:   '13px',
-        color:      '#AAAAAA',
+        fontSize: '13px',
+        color: '#AAAAAA',
       }).setOrigin(0.5).setAlpha(0);
 
       this.tweens.add({ targets: prompt, alpha: 1, duration: 500 });
 
       // Parpadeo
       this.tweens.add({
-        targets:  prompt,
-        alpha:    { from: 1, to: 0.3 },
+        targets: prompt,
+        alpha: { from: 1, to: 0.3 },
         duration: 900,
-        yoyo:     true,
-        repeat:   -1,
-        delay:    600,
+        yoyo: true,
+        repeat: -1,
+        delay: 600,
       });
 
       // Habilitar input después de que aparezca el prompt

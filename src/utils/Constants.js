@@ -22,6 +22,7 @@ export const SCENES = {
   VICTORY:    'VictoryScene',
   TUTORIAL:   'TutorialScene',
   SETTINGS:   'SettingsScene',
+  INVENTORY:   'InventoryScene',
 };
 
 // ─── Teclas de movimiento ─────────────────────────────────────────────────────

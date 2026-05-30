@@ -21,6 +21,7 @@ import { GameOverScene } from './scenes/GameOverScene.js';
 import { VictoryScene }  from './scenes/VictoryScene.js';
 import { TutorialScene } from './scenes/TutorialScene.js';
 import { SettingsScene } from './scenes/SettingsScene.js';
+import { InventoryScene } from './scenes/InventoryScene.js';
 
 /** @type {Phaser.Types.Core.GameConfig} */
 export const gameConfig = {
@@ -83,5 +84,6 @@ export const gameConfig = {
     VictoryScene,   // 9. Pantalla de victoria
     TutorialScene,  // 10. Tutorial de controles
     SettingsScene,  // 11. Ajustes de accesibilidad y audio
+    InventoryScene, // 12. Inventario
   ],
 };
