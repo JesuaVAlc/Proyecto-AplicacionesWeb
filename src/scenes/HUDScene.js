@@ -303,7 +303,10 @@ export class HUDScene extends Phaser.Scene {
 
   shutdown() {
     this.input.keyboard.off('keydown-M', () => this._toggleMute());
-    this._minimap.destroy();
+    this._hpBar?.destroy();
+    this._mpBar?.destroy();
+    this._expBar?.destroy();
+    this._minimap?.destroy();
   }
 
 }

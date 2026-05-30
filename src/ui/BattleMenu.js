@@ -52,7 +52,7 @@ export class BattleMenu {
    * Fondo y borde del panel del menú.
    */
   _buildPanel() {
-    this._panelBg = this._scene.add.graphics();
+    this._panelBg = this._scene.add.graphics().setDepth(10);
     this._panelBg.fillStyle(0x000033, 0.9);
     this._panelBg.fillRoundedRect(this._x - 8, this._y - 8, 220, 110, 6);
     this._panelBg.lineStyle(2, 0xFFD700, 0.8);
@@ -68,7 +68,7 @@ export class BattleMenu {
         fontFamily: 'monospace',
         fontSize:   '14px',
         color:      '#CCCCCC',
-      })
+      }).setDepth(11)
     );
   }
 
@@ -81,7 +81,7 @@ export class BattleMenu {
         fontFamily: 'monospace',
         fontSize:   '12px',
         color:      '#CCCCCC',
-      }).setVisible(false)
+      }).setDepth(11).setVisible(false)
     );
   }
 
@@ -93,7 +93,7 @@ export class BattleMenu {
       fontFamily: 'monospace',
       fontSize:   '14px',
       color:      '#FFD700',
-    });
+    }).setDepth(12);
   }
 
   // ─── Navegación ───────────────────────────────────────────────────────────────

@@ -332,6 +332,14 @@ export class TutorialScene extends Phaser.Scene {
       fontSize: '12px',
       color: '#AAAAAA',
     }).setOrigin(1, 0.5);
+
+    this._titleText = this.add.text(GAME_WIDTH / 2, 60, '', {
+      fontFamily: 'monospace',
+      fontSize: '18px',
+      color: '#FFFFFF',
+      stroke: '#000000',
+      strokeThickness: 2,
+    }).setOrigin(0.5);
   }
 
   /**
@@ -439,6 +447,25 @@ export class TutorialScene extends Phaser.Scene {
       this._renderTheory(step);
     } else {
       this._renderPractice(step);
+    }
+
+    this._clearMockMenu();
+    this._player.setVisible(false);
+    this._arenaGraphic.setVisible(false);
+
+    if (step.type === 'practice') {
+      const isMove = ['move_up', 'move_down', 'move_left', 'move_right'].includes(step.action);
+      if (isMove) {
+        this._player.setVisible(true);
+        this._arenaGraphic.setVisible(true);
+        this._player.setPosition(this._playerStartX, this._playerStartY);
+      } else if (step.mockBattle) {
+        this._buildMockBattleMenu();
+      } else if (step.mockSkills) {
+        this._buildMockSkillsMenu();
+      } else if (step.mockInventory) {
+        this._buildMockInventoryMenu();
+      }
     }
 
     // Animación de entrada del diálogo
@@ -771,7 +798,7 @@ export class TutorialScene extends Phaser.Scene {
       `✗ ${msg}`,
       ''
     ]);
-    this._scene.time.delayedCall(1500, () => {
+    this.time.delayedCall(1500, () => {
       this._dialog.setLineColor(2, '#DDDDDD');
       this._dialog.setLines([
         ...this._dialog._contentStrs.slice(0, 2),

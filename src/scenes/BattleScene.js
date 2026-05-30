@@ -86,7 +86,7 @@ export class BattleScene extends Phaser.Scene {
       LAYOUT.logY,
       LAYOUT.logW,
       LAYOUT.logH,
-      { mode: 'log', maxLines: 3, depth: 5 }
+      { mode: 'log', maxLines: 3, depth: 3 }
     );
     // ── Determinar quién va primero ───────────────────────────────────────
     this._currentTurn = this._manager.getFirstTurn();
@@ -575,6 +575,7 @@ export class BattleScene extends Phaser.Scene {
       defense: this._player.defense,
       speed: this._player.speed,
       inventory: this._player.inventory,
+      skills: this._player.skills,
     });
 
     this.time.delayedCall(2000, () => this._endBattle('win'));

@@ -17,7 +17,7 @@
  */
 
 import Phaser from 'phaser';
-import { SCENES, PLAYER_STATES ,GAME_WIDTH, GAME_HEIGHT, STORAGE_KEYS } from '../utils/Constants.js';
+import { SCENES, PLAYER_STATES, GAME_WIDTH, GAME_HEIGHT, STORAGE_KEYS } from '../utils/Constants.js';
 import { Player } from '../objects/Player.js';
 import { ENEMIES } from '../data/enemies.js';
 
@@ -82,12 +82,11 @@ export class GameScene extends Phaser.Scene {
     this._battleResult = data?.battleResult ?? null;
     this._defeatedEnemy = data?.enemyId ?? null;
 
-    if (data?.inventoryResult) {
-      const updated = this.registry.get('inventoryPlayerData');
-      if (updated && this.player) {
-        this.player.hp = updated.hp;
-        this.player.inventory = updated.inventory;
-      }
+    const inventoryResult = this.registry.get('inventoryPlayerData');
+    if (inventoryResult && this.player) {
+      this.player.hp = inventoryResult.hp;
+      this.player.inventory = inventoryResult.inventory;
+      this.registry.remove('inventoryPlayerData');
     }
   }
 
@@ -515,6 +514,7 @@ export class GameScene extends Phaser.Scene {
    */
   _onBattleLose() {
     console.log('[GameScene] Derrota en batalla.');
+    this.scene.stop(SCENES.HUD);
     this.scene.start(SCENES.GAME_OVER, { reason: 'battle' });
   }
 
